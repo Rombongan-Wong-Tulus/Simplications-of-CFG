@@ -1,1645 +1,524 @@
 <!DOCTYPE html>
-<html lang="id" class="light">
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simplification of Context-Free Grammars — Peter Linz Bab 6</title>
-
-  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Plus Jakarta Sans', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          },
-          colors: {
-            brand: {
-              indigo: '#4F46E5',
-              violet: '#7C3AED',
-              emerald: '#10B981',
-              rose: '#F43F5E',
-              amber: '#F59E0B',
-            }
-          }
-        }
-      }
-    };
-  </script>
-
-  <!-- GSAP & MotionPathPlugin CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
-
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
-  <style>
-    :root {
-      --dot-color: rgba(148, 163, 184, 0.28);
-      --glass-bg: rgba(255, 255, 255, 0.82);
-      --glass-border: rgba(226, 232, 240, 0.9);
-      --svg-stage-bg: rgba(241, 245, 249, 0.72);
-    }
-
-    html.dark {
-      --dot-color: rgba(51, 65, 85, 0.45);
-      --glass-bg: rgba(15, 23, 42, 0.78);
-      --glass-border: rgba(30, 41, 59, 0.95);
-      --svg-stage-bg: rgba(15, 23, 42, 0.65);
-    }
-
-    body {
-      background-image: radial-gradient(var(--dot-color) 1.2px, transparent 1.2px);
-      background-size: 24px 24px;
-      overflow: hidden;
-      user-select: none;
-    }
-
-    .glass-card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid var(--glass-border);
-      box-shadow: 0 20px 45px -15px rgba(15, 23, 42, 0.08), 0 4px 16px -4px rgba(15, 23, 42, 0.04);
-    }
-
-    html.dark .glass-card {
-      box-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.55);
-    }
-
-    .svg-stage {
-      background: var(--svg-stage-bg);
-      border: 1px solid var(--glass-border);
-    }
-
-    .slide {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 2rem 3.5rem 3.25rem;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    .slide.active {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-    }
-
-    .rule-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.2rem 0.6rem;
-      border-radius: 0.5rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 600;
-      transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
-    }
-
-    @media (max-width: 900px) {
-      .slide {
-        padding: 1.5rem 1.25rem 2.75rem;
-        overflow-y: auto;
-        justify-content: flex-start;
-      }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0f766e">
+<title>Simplification of Context-Free Grammars — Interactive Slides</title>
+<style>
+:root{
+  --bg:#f4f8f8;--paper:#ffffff;--ink:#142b32;--muted:#61757b;--line:#dce8e8;
+  --teal:#0f766e;--teal2:#14b8a6;--mint:#d9f5ef;--navy:#12343b;
+  --amber:#d97706;--amber-bg:#fff5df;--rose:#be4560;--rose-bg:#fff0f3;
+  --blue:#4169a8;--blue-bg:#edf3ff;--shadow:0 20px 55px rgba(16,55,60,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:
+ radial-gradient(circle at 10% 10%,rgba(20,184,166,.08),transparent 28%),
+ radial-gradient(circle at 90% 85%,rgba(65,105,168,.07),transparent 26%),var(--bg);color:var(--ink)}
+button{font:inherit;cursor:pointer}
+#app{height:100%;display:flex;flex-direction:column}
+.topbar{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;border-bottom:1px solid rgba(220,232,232,.9);background:rgba(255,255,255,.72);backdrop-filter:blur(16px);z-index:10}
+.brand{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#426168}
+.brand-mark{width:26px;height:26px;border-radius:9px;background:linear-gradient(135deg,var(--teal),#36c5a9);display:grid;place-items:center;color:white;font-weight:900}
+.top-actions{display:flex;gap:8px}
+.icon-btn{border:1px solid var(--line);background:white;color:var(--ink);border-radius:10px;padding:8px 11px;font-size:12px;font-weight:700}
+.icon-btn:hover,.nav-btn:hover{border-color:var(--teal2);color:var(--teal)}
+.deck{position:relative;flex:1;min-height:0;overflow:hidden}
+.slide{position:absolute;inset:0;display:none;padding:clamp(22px,4vh,46px) clamp(22px,6vw,90px) 76px;overflow:auto;animation:enter .42s ease both}
+.slide.active{display:flex;flex-direction:column}
+@keyframes enter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:850;color:var(--teal);margin-bottom:12px}
+.kicker:before{content:"";width:22px;height:2px;background:var(--teal2);border-radius:9px}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:clamp(42px,6vw,76px);line-height:1.02;letter-spacing:-.055em;margin-bottom:18px}
+h2{font-size:clamp(29px,4vw,46px);letter-spacing:-.04em;line-height:1.08;margin-bottom:10px}
+h3{font-size:18px;letter-spacing:-.02em;margin-bottom:8px}
+.lead{font-size:clamp(15px,1.7vw,19px);line-height:1.65;color:var(--muted);max-width:820px}
+.muted{color:var(--muted)}
+.small{font-size:12px;line-height:1.55;color:var(--muted)}
+.grid{display:grid;gap:16px}
+.two{grid-template-columns:1.05fr .95fr}
+.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow)}
+.card.soft{background:#f8fbfb;box-shadow:none}
+.card.dark{background:var(--navy);color:#eafffb;border-color:transparent}
+.card.dark .muted,.card.dark .small{color:#b5d2d0}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:var(--mint);color:var(--teal);font-size:11px;font-weight:800;letter-spacing:.04em}
+.pill.amber{background:var(--amber-bg);color:var(--amber)}
+.pill.rose{background:var(--rose-bg);color:var(--rose)}
+.pill.blue{background:var(--blue-bg);color:var(--blue)}
+.rule{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:clamp(15px,1.6vw,19px);font-weight:700;line-height:1.8;letter-spacing:.01em}
+.rule-list{display:grid;gap:8px}
+.rule-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 13px;border-radius:12px;background:#f3f8f8;border:1px solid var(--line)}
+.lhs{color:var(--teal);min-width:24px}
+.token{display:inline-block;padding:2px 8px;border-radius:7px;background:#fff;border:1px solid #d8e5e5}
+.token.good{background:var(--mint);border-color:#a6e6d8;color:#08796c}
+.token.warn{background:var(--amber-bg);border-color:#f2d79e;color:#9a5a00}
+.token.bad{background:var(--rose-bg);border-color:#f1c4ce;color:var(--rose)}
+.arrow{color:#90a4a8;font-weight:900}
+.callout{padding:14px 16px;border-radius:14px;background:#eaf8f5;border:1px solid #c6ebe3;color:#245c56;font-size:13px;line-height:1.6}
+.callout.warn{background:var(--amber-bg);border-color:#f4dfb2;color:#83520b}
+.callout.rose{background:var(--rose-bg);border-color:#f4cbd4;color:#883b4e}
+.action{border:0;border-radius:11px;padding:10px 15px;background:var(--teal);color:white;font-weight:800;font-size:12px;box-shadow:0 8px 18px rgba(15,118,110,.18)}
+.action:hover{background:#0b625b;transform:translateY(-1px)}
+.action.secondary{background:white;color:var(--teal);border:1px solid #b9dcd6;box-shadow:none}
+.action.ghost{background:#edf4f4;color:#456168;box-shadow:none}
+.action:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.action-row{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.status{font-size:12px;font-weight:700;color:var(--teal);min-height:20px}
+.stage{border:1px solid var(--line);background:#f8fbfb;border-radius:16px;padding:16px;min-height:150px}
+.stage-title{font-size:10px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;color:#71878b;margin-bottom:12px}
+.steps{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:18px 0}
+.step{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:#6a8085}
+.step b{width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:#e4eeee;color:#6b8286}
+.step.done{color:var(--teal)}.step.done b{background:var(--teal);color:white}
+.step.current b{background:#d8f5ef;color:var(--teal);outline:2px solid #8bd8c9}
+.graph{display:flex;align-items:center;justify-content:center;gap:clamp(10px,3vw,34px);padding:22px 8px;flex-wrap:wrap}
+.node{width:52px;height:52px;border-radius:16px;border:2px solid #bdd7d4;background:white;display:grid;place-items:center;font-family:ui-monospace,monospace;font-weight:900;font-size:20px;color:var(--teal);position:relative;transition:.3s}
+.node.start{background:var(--teal);color:white;border-color:var(--teal)}
+.node.active{box-shadow:0 0 0 7px rgba(20,184,166,.18);transform:scale(1.08);border-color:var(--teal2)}
+.node.dim{opacity:.3;filter:grayscale(1)}
+.edge{height:2px;width:32px;background:#9bb9b5;position:relative}
+.edge:after{content:"";position:absolute;right:-1px;top:-4px;border-left:7px solid #9bb9b5;border-top:5px solid transparent;border-bottom:5px solid transparent}
+.graph-label{font-size:10px;color:#71878b;text-align:center;margin-top:5px}
+.graph-item{display:flex;flex-direction:column;align-items:center}
+.progress-wrap{height:4px;background:#e1ebeb}
+#progress{height:100%;width:0;background:linear-gradient(90deg,var(--teal),#43c9aa);transition:width .35s}
+.footer{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(255,255,255,.86);border-top:1px solid var(--line);z-index:10}
+.footer-left{display:flex;align-items:center;gap:10px;font-size:11px;color:#71878b}
+#counter{font-variant-numeric:tabular-nums;font-weight:800;color:#426168}
+.nav{display:flex;align-items:center;gap:8px}
+.nav-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:white;color:#456168;font-size:18px;font-weight:900}
+.nav-btn.primary{background:var(--teal);color:white;border-color:var(--teal)}
+.dots{display:flex;gap:5px;align-items:center;margin:0 7px}
+.dot{width:6px;height:6px;border:0;border-radius:99px;background:#c9d9d9;padding:0}
+.dot.active{width:20px;background:var(--teal)}
+.cover{justify-content:center}
+.cover-layout{display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:30px}
+.cover h1 span{color:var(--teal)}
+.cover-graphic{min-height:340px;border-radius:28px;background:linear-gradient(145deg,#0f766e,#12343b);display:grid;place-items:center;position:relative;overflow:hidden}
+.cover-graphic:before,.cover-graphic:after{content:"";position:absolute;border:1px solid rgba(220,255,247,.2);border-radius:50%;width:290px;height:290px}
+.cover-graphic:after{width:210px;height:210px}
+.constellation{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,66px);gap:22px;align-items:center;justify-items:center}
+.bubble{width:58px;height:58px;border-radius:18px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);display:grid;place-items:center;color:white;font:800 22px ui-monospace,monospace;animation:float 3s ease-in-out infinite}
+.bubble:nth-child(2n){animation-delay:.5s}.bubble:nth-child(3n){animation-delay:1s}
+@keyframes float{50%{transform:translateY(-9px)}}
+.bubble.main{background:#e1fff7;color:var(--teal);border-color:#e1fff7}
+.big-number{font-size:34px;font-weight:900;letter-spacing:-.05em;color:var(--teal)}
+.list{padding-left:19px;line-height:1.75;color:var(--muted);font-size:14px}
+.reveal{opacity:0;transform:translateY(8px);transition:.35s}
+.reveal.show{opacity:1;transform:none}
+.quiz-option{display:block;text-align:left;width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:white;margin:8px 0;color:var(--ink);font-size:13px;font-weight:700}
+.quiz-option:hover{border-color:var(--teal2)}
+.quiz-option.correct{border-color:#53b99f;background:#e8f8f2;color:#146a5d}
+.quiz-option.wrong{border-color:#e7a7b4;background:#fff0f3;color:#9a4358}
+@media(max-width:850px){.cover-layout,.two{grid-template-columns:1fr}.cover-graphic{min-height:210px}.three{grid-template-columns:1fr}.slide{padding:24px 20px 80px}.topbar{padding:0 14px}.brand{font-size:10px}.footer{padding:0 12px}.dots{display:none}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
 </head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">G</span><span>Formal Languages · Interactive Slides</span></div>
+    <div class="top-actions">
+      <button class="icon-btn" id="themeBtn" title="Ganti tema">◐ Tema</button>
+      <button class="icon-btn" id="fullBtn" title="Layar penuh">⛶ Fullscreen</button>
+    </div>
+  </header>
+  <div class="progress-wrap"><div id="progress"></div></div>
+  <main class="deck" id="deck">
 
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors duration-300">
-
-  <!-- Minimalist Top-Right Controls (Theme & Fullscreen) -->
-  <div class="fixed top-4 right-5 z-50 flex items-center gap-2">
-    <button id="btn-theme" onclick="event.stopPropagation(); toggleTheme();" title="Ganti Tema (T)"
-      class="p-2.5 rounded-xl glass-card text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-105 active:scale-95 transition-all cursor-pointer">
-      <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
-      <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
-    </button>
-    <button id="btn-fullscreen" onclick="event.stopPropagation(); toggleFullscreen();" title="Layar Penuh (F)"
-      class="p-2.5 rounded-xl glass-card text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-105 active:scale-95 transition-all cursor-pointer">
-      <i data-lucide="maximize-2" class="w-4 h-4"></i>
-    </button>
-  </div>
-
-  <!-- Main Presentation Stage (Click empty space to advance slide) -->
-  <main id="deck" class="relative w-screen h-screen cursor-pointer">
-
-    <!-- ==================== SLIDE 1: COVER KINETIK ==================== -->
-    <section class="slide active" id="slide-0">
-      <div class="relative w-full h-full flex flex-col items-center justify-center text-center">
-        <!-- SVG Constellation Background -->
-        <svg id="hero-constellation" class="w-full max-w-3xl h-56 mb-4 overflow-visible" viewBox="0 0 760 220">
-          <defs>
-            <linearGradient id="const-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.55" />
-              <stop offset="50%" stop-color="#7C3AED" stop-opacity="0.75" />
-              <stop offset="100%" stop-color="#10B981" stop-opacity="0.55" />
-            </linearGradient>
-          </defs>
-
-          <!-- Pulsing Connection Lines -->
-          <g stroke="url(#const-grad)" stroke-width="2" fill="none" stroke-dasharray="6 6" class="const-line">
-            <path d="M 380 48 L 220 115" />
-            <path d="M 380 48 L 540 115" />
-            <path d="M 220 115 L 115 178" />
-            <path d="M 220 115 L 315 178" />
-            <path d="M 540 115 L 445 178" />
-            <path d="M 540 115 L 645 178" />
-          </g>
-
-          <!-- Floating CFG Constellation Nodes -->
-          <g class="const-node" transform="translate(380, 48)">
-            <circle r="28" class="fill-indigo-600 shadow-lg" />
-            <text y="6" text-anchor="middle" fill="#FFFFFF" class="font-mono font-bold text-lg">S</text>
-          </g>
-          <g class="const-node" transform="translate(220, 115)">
-            <circle r="24" class="fill-white dark:fill-slate-900 stroke-indigo-500" stroke-width="2.5" />
-            <text y="6" text-anchor="middle" class="fill-indigo-600 dark:fill-indigo-400 font-mono font-bold text-base">A</text>
-          </g>
-          <g class="const-node" transform="translate(540, 115)">
-            <circle r="24" class="fill-white dark:fill-slate-900 stroke-violet-500" stroke-width="2.5" />
-            <text y="6" text-anchor="middle" class="fill-violet-600 dark:fill-violet-400 font-mono font-bold text-base">B</text>
-          </g>
-          <g class="const-node" transform="translate(115, 178)">
-            <rect x="-20" y="-20" width="40" height="40" rx="12" class="fill-emerald-500/15 stroke-emerald-500" stroke-width="2" />
-            <text y="6" text-anchor="middle" class="fill-emerald-600 dark:fill-emerald-400 font-mono font-bold text-base">a</text>
-          </g>
-          <g class="const-node" transform="translate(315, 178)">
-            <rect x="-20" y="-20" width="40" height="40" rx="12" class="fill-rose-500/15 stroke-rose-500" stroke-width="2" />
-            <text y="6" text-anchor="middle" class="fill-rose-600 dark:fill-rose-400 font-mono font-bold text-base">λ</text>
-          </g>
-          <g class="const-node" transform="translate(445, 178)">
-            <rect x="-20" y="-20" width="40" height="40" rx="12" class="fill-emerald-500/15 stroke-emerald-500" stroke-width="2" />
-            <text y="6" text-anchor="middle" class="fill-emerald-600 dark:fill-emerald-400 font-mono font-bold text-base">b</text>
-          </g>
-          <g class="const-node" transform="translate(645, 178)">
-            <rect x="-22" y="-20" width="44" height="40" rx="12" class="fill-amber-500/15 stroke-amber-500" stroke-width="2" />
-            <text y="6" text-anchor="middle" class="fill-amber-600 dark:fill-amber-400 font-mono font-bold text-sm">CNF</text>
-          </g>
-        </svg>
-
-        <div class="hero-stagger inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-widest mb-4">
-          <i data-lucide="git-branch" class="w-3.5 h-3.5"></i>
-          <span>Teori Bahasa & Otomata • Bab 6 Peter Linz</span>
-        </div>
-
-        <h1 class="hero-stagger text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.08] mb-4 bg-gradient-to-br from-slate-900 via-indigo-700 to-violet-600 dark:from-white dark:via-indigo-300 dark:to-violet-400 bg-clip-text text-transparent">
-          Simplification of<br />Context-Free Grammars
-        </h1>
-
-        <p class="hero-stagger text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed mb-7">
-          Koreografi transformasi tata bahasa bebas konteks untuk mengeliminasi produksi kosong (<span class="font-mono font-semibold text-rose-500">λ</span>), produksi unit (<span class="font-mono font-semibold text-indigo-500">A → B</span>), dan simbol tak berguna tanpa mengubah <span class="font-mono font-semibold">L(G)</span>.
-        </p>
-
-      </div>
-    </section>
-
-    <!-- ==================== SLIDE 2: URUTAN WAJIB & EFEK DOMINO ==================== -->
-    <section class="slide" id="slide-1">
-      <div class="mb-5">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider mb-2">
-          <span>Aturan Fundamental</span>
-        </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Urutan Wajib & Efek Domino Transformasi</h2>
-        <p class="text-slate-600 dark:text-slate-400 mt-1 text-sm sm:text-base max-w-3xl">
-          Setiap tahap pembersihan dapat memicu kemunculan anomali baru sehingga urutan eksekusi tidak boleh dibalik.
-        </p>
-      </div>
-
-      <div class="glass-card rounded-3xl p-6">
-        <!-- Action Bar -->
-        <div class="flex flex-wrap items-center justify-between gap-3 pb-5 mb-6 border-b border-slate-200/80 dark:border-slate-800">
-          <div class="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300">
-            <i data-lucide="workflow" class="w-4 h-4 text-indigo-500"></i>
-            <span>Pipeline Penyederhanaan Berurutan</span>
+    <!-- 1 -->
+    <section class="slide cover active">
+      <div class="cover-layout">
+        <div>
+          <div class="kicker">Teori Bahasa dan Otomata · Bab 6</div>
+          <h1>Simplification of <span>Context-Free</span> Grammars</h1>
+          <p class="lead">Menyederhanakan tata bahasa bebas konteks dengan menghilangkan produksi λ, produksi unit, dan simbol yang tidak berguna—tanpa mengubah bahasa yang dihasilkan.</p>
+          <div class="steps">
+            <span class="pill">01 · λ-productions</span>
+            <span class="pill">02 · Unit-productions</span>
+            <span class="pill">03 · Useless symbols</span>
           </div>
-          <div class="flex items-center gap-2">
-            <button id="btn-domino" onclick="event.stopPropagation(); runDominoSimulation();"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer">
-              <i data-lucide="play" class="w-4 h-4"></i>
-              <span>Simulasi Efek Domino</span>
-            </button>
-            <button id="btn-domino-reset" onclick="event.stopPropagation(); resetDominoSimulation();"
-              class="hidden inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm transition-all cursor-pointer">
-              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-              <span>Reset</span>
-            </button>
-          </div>
+          <p class="small">Gunakan tombol panah atau keyboard ← → untuk berpindah slide. Tombol simulasi digunakan untuk melihat proses transformasi.</p>
         </div>
-
-        <!-- SVG Pipeline + Cards -->
-        <div class="relative">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-            <!-- Stage 1 -->
-            <div id="dom-card-1" class="rounded-2xl p-5 bg-white/80 dark:bg-slate-900/80 border-2 border-slate-200 dark:border-slate-800 transition-colors">
-              <div class="flex items-center justify-between mb-3">
-                <span class="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 font-mono text-xs font-bold">TAHAP 01</span>
-                <span class="font-mono font-bold text-rose-500 text-sm">A → λ</span>
-              </div>
-              <h3 class="text-lg font-extrabold mb-1.5">Hapus λ-Productions</h3>
-              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Substitusi variabel <em>nullable</em> pada <span class="font-mono font-semibold">S → AB</span> menghasilkan kombinasi <span class="font-mono font-semibold text-indigo-500">S → A | B</span> (unit production baru!).
-              </p>
-            </div>
-
-            <!-- Stage 2 -->
-            <div id="dom-card-2" class="rounded-2xl p-5 bg-white/80 dark:bg-slate-900/80 border-2 border-slate-200 dark:border-slate-800 opacity-50 transition-colors">
-              <div class="flex items-center justify-between mb-3">
-                <span class="px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-bold">TAHAP 02</span>
-                <span class="font-mono font-bold text-indigo-500 text-sm">A → B</span>
-              </div>
-              <h3 class="text-lg font-extrabold mb-1.5">Hapus Unit Productions</h3>
-              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Menyalin produksi non-unit secara transitif lalu memutus edge <span class="font-mono font-semibold">A → B</span>, yang sering membuat variabel menjadi terisolasi.
-              </p>
-            </div>
-
-            <!-- Stage 3 -->
-            <div id="dom-card-3" class="rounded-2xl p-5 bg-white/80 dark:bg-slate-900/80 border-2 border-slate-200 dark:border-slate-800 opacity-50 transition-colors">
-              <div class="flex items-center justify-between mb-3">
-                <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-bold">TAHAP 03</span>
-                <span class="font-mono font-bold text-emerald-500 text-sm">Useless</span>
-              </div>
-              <h3 class="text-lg font-extrabold mb-1.5">Hapus Useless Productions</h3>
-              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Pembersihan final: buang variabel <em>non-generating</em> lalu pangkas seluruh variabel <em>unreachable</em> dari <span class="font-mono font-semibold">S</span>.
-              </p>
-            </div>
-          </div>
-
-          <!-- Energy Particle Bar -->
-          <div class="hidden md:block mt-5 relative h-3 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-            <div id="dom-energy-bar" class="h-full w-0 bg-gradient-to-r from-rose-500 via-indigo-500 to-emerald-500 rounded-full"></div>
-          </div>
-        </div>
-
-        <!-- Warning Box on Reversed Order -->
-        <div id="dom-warning" class="mt-5 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 opacity-80">
-          <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5"></i>
-          <div class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-            <strong class="text-amber-600 dark:text-amber-400">Mengapa Urutan Tidak Boleh Terbalik?</strong>
-            Jika Unit Productions dihapus <em>sebelum</em> <span class="font-mono">λ</span>-Productions, maka penghapusan <span class="font-mono">B → λ</span> pada <span class="font-mono">A → BC</span> akan memunculkan kembali unit production baru <span class="font-mono font-bold text-rose-500">A → C</span>!
+        <div class="cover-graphic" aria-label="Ilustrasi simpul grammar">
+          <div class="constellation">
+            <div class="bubble">A</div><div class="bubble main">S</div><div class="bubble">B</div>
+            <div class="bubble">λ</div><div class="bubble">→</div><div class="bubble">a</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==================== SLIDE 3: ELIMINASI LAMBDA-PRODUCTIONS ==================== -->
-    <section class="slide" id="slide-2">
-      <div class="mb-5">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold uppercase tracking-wider mb-2">
-          <span>Tahap 1 • Teorema 6.3</span>
-        </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Eliminasi λ-Productions</h2>
-        <p class="text-slate-600 dark:text-slate-400 mt-1 text-sm sm:text-base">
-          Tarik seluruh variabel <em>nullable</em> (<span class="font-mono">V ⇒* λ</span>), bangkitkan kombinasi pengganti, lalu eliminasi aturan kosong.
-        </p>
+    <!-- 2 -->
+    <section class="slide">
+      <div class="kicker">Gambaran umum</div>
+      <h2>Mengapa CFG perlu disederhanakan?</h2>
+      <p class="lead">Bentuk CFG yang terlalu bebas dapat memuat aturan yang tidak diperlukan dalam proses derivasi. Penyederhanaan menghilangkan jenis produksi tertentu agar bentuk grammar lebih mudah dianalisis.</p>
+      <div class="grid three" style="margin-top:24px">
+        <article class="card">
+          <span class="pill rose">01 · λ</span><div class="big-number">A → λ</div>
+          <h3>Produksi kosong</h3><p class="small">Aturan yang menghasilkan string kosong. Variabel yang dapat menghasilkan λ disebut <em>nullable</em>.</p>
+        </article>
+        <article class="card">
+          <span class="pill blue">02 · Unit</span><div class="big-number">A → B</div>
+          <h3>Produksi unit</h3><p class="small">Aturan dengan satu variabel di sisi kiri dan satu variabel di sisi kanan.</p>
+        </article>
+        <article class="card">
+          <span class="pill amber">03 · Useless</span><div class="big-number">A ↛ w</div>
+          <h3>Simbol tak berguna</h3><p class="small">Variabel yang tidak berkontribusi pada derivasi string terminal dari simbol awal.</p>
+        </article>
       </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        <!-- Left: Grammar Workspace -->
-        <div class="lg:col-span-7 glass-card rounded-3xl p-6 flex flex-col justify-between">
-          <div>
-            <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-200/80 dark:border-slate-800">
-              <span class="font-mono text-sm font-bold text-slate-600 dark:text-slate-300">Tata Bahasa G (λ ∉ L(G))</span>
-              <div class="flex items-center gap-2">
-                <button id="btn-lam-step" onclick="event.stopPropagation(); nextLambdaStep();"
-                  class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer">
-                  <i data-lucide="play" class="w-4 h-4"></i>
-                  <span>Langkah 1: Deteksi Nullable</span>
-                </button>
-                <button id="btn-lam-reset" onclick="event.stopPropagation(); resetLambdaStep();"
-                  class="hidden inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm transition-all cursor-pointer">
-                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                  <span>Reset</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Grammar Rules -->
-            <div class="space-y-3.5 font-mono text-base sm:text-lg">
-              <!-- Rule S -->
-              <div id="lam-rule-S" class="p-3.5 rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-2">
-                <span id="lam-lhs-S" class="font-bold text-indigo-600 dark:text-indigo-400 mr-1">S →</span>
-                <span class="rule-pill bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">aSb</span>
-                <span>|</span>
-                <span id="lam-s-ab" class="rule-pill bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">AB</span>
-                <span id="lam-s-comb1" class="hidden rule-pill bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">| A</span>
-                <span id="lam-s-comb2" class="hidden rule-pill bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">| B</span>
-                <span id="lam-s-comb3" class="hidden rule-pill bg-rose-500/15 text-rose-500 border border-rose-500/30">| λ</span>
-              </div>
-
-              <!-- Rule A -->
-              <div id="lam-rule-A" class="p-3.5 rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-2">
-                <span id="lam-lhs-A" class="font-bold text-indigo-600 dark:text-indigo-400 mr-1">A →</span>
-                <span class="rule-pill bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">aA</span>
-                <span id="lam-a-new" class="hidden rule-pill bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">| a</span>
-                <span id="lam-a-lam" class="rule-pill bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">| λ</span>
-              </div>
-
-              <!-- Rule B -->
-              <div id="lam-rule-B" class="p-3.5 rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-2">
-                <span id="lam-lhs-B" class="font-bold text-indigo-600 dark:text-indigo-400 mr-1">B →</span>
-                <span class="rule-pill bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">bB</span>
-                <span id="lam-b-new" class="hidden rule-pill bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">| b</span>
-                <span id="lam-b-lam" class="rule-pill bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">| λ</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-5 pt-3 border-t border-slate-200/80 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
-            <i data-lucide="info" class="w-4 h-4 text-indigo-500 shrink-0"></i>
-            <span>Karena <span class="font-mono font-semibold">λ ∉ L(G)</span>, kombinasi kosong <span class="font-mono font-semibold">S → λ</span> tidak disertakan.</span>
-          </div>
-        </div>
-
-        <!-- Right: Nullable Container & Step Log -->
-        <div class="lg:col-span-5 glass-card rounded-3xl p-6 flex flex-col justify-between">
-          <div>
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2.5">Wadah Himpunan Nullable (V_N)</span>
-            <div id="nullable-bucket" class="min-h-[84px] p-4 rounded-2xl bg-slate-100/90 dark:bg-slate-900/90 border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center gap-3 flex-wrap">
-              <span id="nullable-placeholder" class="font-mono text-sm text-slate-400">V_N = { kosong }</span>
-              <span id="nb-token-A" class="hidden px-4 py-1.5 rounded-xl bg-amber-500 text-white font-mono font-bold text-base shadow-md">A</span>
-              <span id="nb-token-B" class="hidden px-4 py-1.5 rounded-xl bg-amber-500 text-white font-mono font-bold text-base shadow-md">B</span>
-              <span id="nb-token-S" class="hidden px-4 py-1.5 rounded-xl bg-indigo-600 text-white font-mono font-bold text-base shadow-md">S (via AB)</span>
-            </div>
-
-            <div class="mt-6">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2">Log Transformasi</span>
-              <p id="lam-log" class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Klik <strong>"Langkah 1: Deteksi Nullable"</strong> untuk mengidentifikasi variabel yang dapat menurunkan string kosong <span class="font-mono">λ</span> baik secara langsung maupun tidak langsung.
-              </p>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-200/80 dark:border-slate-800 text-center font-mono text-xs">
-            <div id="lam-ind-1" class="py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold">1. Nullable</div>
-            <div id="lam-ind-2" class="py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold">2. Kombinasi</div>
-            <div id="lam-ind-3" class="py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold">3. Hapus λ</div>
-          </div>
+      <div class="card" style="margin-top:18px">
+        <div class="kicker">Urutan pada Teorema 6.5</div>
+        <div class="grid three">
+          <div><div class="big-number">1</div><b>Hapus λ-productions</b><p class="small">Dapat menghasilkan unit-productions baru.</p></div>
+          <div><div class="big-number">2</div><b>Hapus unit-productions</b><p class="small">Dapat membuat variabel lain menjadi tidak berguna.</p></div>
+          <div><div class="big-number">3</div><b>Hapus useless productions</b><p class="small">Tahap akhir membersihkan variabel dan aturan yang tersisa.</p></div>
         </div>
       </div>
+      <div class="callout warn" style="margin-top:14px">Catatan penting: urutan ini mengikuti Theorem 6.5 pada buku. Untuk bahasa yang memuat λ, penanganan simbol awal perlu mempertahankan λ (misalnya dengan simbol awal baru S₀ → S | λ).</div>
     </section>
 
-    <!-- ==================== SLIDE 4: ELIMINASI UNIT PRODUCTIONS (MOTIONPATH SVG) ==================== -->
-    <section class="slide" id="slide-3">
-      <div class="mb-5">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider mb-2">
-          <span>Tahap 2 • Teorema 6.4</span>
-        </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Eliminasi Unit Productions</h2>
-        <p class="text-slate-600 dark:text-slate-400 mt-1 text-sm sm:text-base">
-          Paket produksi non-unit mengalir mundur menyusuri kurva graf ketergantungan untuk menggantikan seluruh rantai <span class="font-mono">A → B</span>.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        <!-- Left: SVG Dependency Graph -->
-        <div class="lg:col-span-7 glass-card rounded-3xl p-6">
-          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-200/80 dark:border-slate-800">
-            <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Graf Ketergantungan Unit (MotionPath)</span>
-            <div class="flex items-center gap-2">
-              <button id="btn-unit-run" onclick="event.stopPropagation(); runUnitMotionPath();"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer">
-                <i data-lucide="play" class="w-4 h-4"></i>
-                <span>Jalankan Propagasi Node</span>
-              </button>
-              <button id="btn-unit-reset" onclick="event.stopPropagation(); resetUnitMotionPath();"
-                class="hidden inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm transition-all cursor-pointer">
-                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                <span>Reset Graf</span>
-              </button>
-            </div>
+    <!-- 3 -->
+    <section class="slide">
+      <div class="kicker">Tahap 1 · Theorem 6.3</div>
+      <h2>Eliminasi λ-productions</h2>
+      <p class="lead">Cari semua variabel <em>nullable</em>, buat alternatif produksi dengan menghilangkan variabel nullable dalam semua kombinasi, lalu hapus produksi λ.</p>
+      <div class="grid two" style="margin-top:20px;align-items:start">
+        <div class="card">
+          <div class="stage-title">Grammar awal · λ ∉ L(G)</div>
+          <div class="rule-list rule" id="lambdaBefore">
+            <div class="rule-row"><span class="lhs">S →</span><span>aSb</span><span>|</span><span>AB</span><span>|</span><span>c</span></div>
+            <div class="rule-row"><span class="lhs">A →</span><span>aA</span><span>|</span><span>a</span><span>|</span><span class="token bad">λ</span></div>
+            <div class="rule-row"><span class="lhs">B →</span><span>bB</span><span>|</span><span>b</span></div>
           </div>
-
-          <svg id="unit-svg" class="w-full h-[270px] rounded-2xl svg-stage overflow-visible" viewBox="0 0 560 270">
-            <defs>
-              <marker id="arr-unit" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L8,3 z" fill="#F43F5E" />
-              </marker>
-              <filter id="glow-emerald" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="4" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-
-            <!-- Curved Unit Paths (Forward S->A->B->C) & Reverse MotionPaths -->
-            <!-- S(70,115) -> A(210,115) -> B(350,115) -> C(490,115) -->
-            <path id="u-path-SA" d="M 98 106 Q 140 72 182 106" fill="none" stroke="#F43F5E" stroke-width="3" marker-end="url(#arr-unit)" />
-            <text x="140" y="78" text-anchor="middle" fill="#F43F5E" class="font-mono text-[11px] font-bold" id="u-lbl-SA">unit</text>
-
-            <path id="u-path-AB" d="M 238 106 Q 280 72 322 106" fill="none" stroke="#F43F5E" stroke-width="3" marker-end="url(#arr-unit)" />
-            <text x="280" y="78" text-anchor="middle" fill="#F43F5E" class="font-mono text-[11px] font-bold" id="u-lbl-AB">unit</text>
-
-            <path id="u-path-BC" d="M 378 106 Q 420 72 462 106" fill="none" stroke="#F43F5E" stroke-width="3" marker-end="url(#arr-unit)" />
-            <text x="420" y="78" text-anchor="middle" fill="#F43F5E" class="font-mono text-[11px] font-bold" id="u-lbl-BC">unit</text>
-
-            <!-- Hidden Reverse Curves for GSAP MotionPath -->
-            <path id="rev-CB" d="M 490 115 Q 420 165 350 115" fill="none" stroke="none" />
-            <path id="rev-BA" d="M 350 115 Q 280 165 210 115" fill="none" stroke="none" />
-            <path id="rev-AS" d="M 210 115 Q 140 165 70 115" fill="none" stroke="none" />
-
-            <!-- Terminal Badges under Nodes -->
-            <g transform="translate(490, 178)">
-              <rect x="-32" y="-15" width="64" height="30" rx="8" fill="rgba(16,185,129,0.16)" stroke="#10B981" stroke-width="1.5" />
-              <text y="5" text-anchor="middle" fill="#10B981" class="font-mono font-bold text-xs">c</text>
-            </g>
-
-            <g transform="translate(350, 178)">
-              <rect x="-36" y="-15" width="72" height="30" rx="8" fill="rgba(16,185,129,0.16)" stroke="#10B981" stroke-width="1.5" />
-              <text id="u-badge-text-B" y="5" text-anchor="middle" fill="#10B981" class="font-mono font-bold text-xs">b</text>
-            </g>
-
-            <g id="u-badge-A" transform="translate(210, 178)" style="opacity: 0;">
-              <rect x="-40" y="-15" width="80" height="30" rx="8" fill="rgba(16,185,129,0.16)" stroke="#10B981" stroke-width="1.5" />
-              <text y="5" text-anchor="middle" fill="#10B981" class="font-mono font-bold text-xs">+ b | c</text>
-            </g>
-
-            <g id="u-badge-S" transform="translate(70, 178)" style="opacity: 0;">
-              <rect x="-40" y="-15" width="80" height="30" rx="8" fill="rgba(16,185,129,0.16)" stroke="#10B981" stroke-width="1.5" />
-              <text y="5" text-anchor="middle" fill="#10B981" class="font-mono font-bold text-xs">+ b | c</text>
-            </g>
-
-            <!-- Nodes S, A, B, C -->
-            <g id="u-node-S" transform="translate(70, 115)">
-              <circle r="26" class="fill-white dark:fill-slate-900 stroke-indigo-600" stroke-width="3" />
-              <text y="6" text-anchor="middle" class="fill-slate-900 dark:fill-white font-mono font-bold text-lg">S</text>
-            </g>
-            <g id="u-node-A" transform="translate(210, 115)">
-              <circle r="26" class="fill-white dark:fill-slate-900 stroke-slate-500" stroke-width="3" />
-              <text y="6" text-anchor="middle" class="fill-slate-900 dark:fill-white font-mono font-bold text-lg">A</text>
-            </g>
-            <g id="u-node-B" transform="translate(350, 115)">
-              <circle r="26" class="fill-white dark:fill-slate-900 stroke-slate-500" stroke-width="3" />
-              <text y="6" text-anchor="middle" class="fill-slate-900 dark:fill-white font-mono font-bold text-lg">B</text>
-            </g>
-            <g id="u-node-C" transform="translate(490, 115)">
-              <circle r="26" class="fill-white dark:fill-slate-900 stroke-emerald-500" stroke-width="3" />
-              <text y="6" text-anchor="middle" class="fill-slate-900 dark:fill-white font-mono font-bold text-lg">C</text>
-            </g>
-
-            <!-- Glowing Data Packet -->
-            <g id="u-packet" style="opacity: 0;" filter="url(#glow-emerald)">
-              <circle r="11" fill="#10B981" />
-              <circle r="5" fill="#FFFFFF" />
-            </g>
-          </svg>
-        </div>
-
-        <!-- Right: Production Rules Transformation -->
-        <div class="lg:col-span-5 glass-card rounded-3xl p-6 flex flex-col justify-between">
-          <div>
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-3">Transformasi Aturan Produksi</span>
-            <div class="space-y-3 font-mono text-base">
-              <div class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
-                <span class="font-bold text-indigo-600 dark:text-indigo-400">S →</span>
-                <span id="ur-S-old" class="rule-pill bg-rose-500/10 text-rose-500">A</span>
-                <span id="ur-S-new" class="hidden rule-pill bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">b | c</span>
-              </div>
-              <div class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
-                <span class="font-bold text-indigo-600 dark:text-indigo-400">A →</span>
-                <span id="ur-A-old" class="rule-pill bg-rose-500/10 text-rose-500">B</span>
-                <span id="ur-A-new" class="hidden rule-pill bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">b | c</span>
-              </div>
-              <div class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
-                <span class="font-bold text-indigo-600 dark:text-indigo-400">B →</span>
-                <span>b |</span>
-                <span id="ur-B-old" class="rule-pill bg-rose-500/10 text-rose-500">C</span>
-                <span id="ur-B-new" class="hidden rule-pill bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">c</span>
-              </div>
-              <div class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
-                <span class="font-bold text-indigo-600 dark:text-indigo-400">C →</span>
-                <span class="rule-pill bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">c</span>
-              </div>
-            </div>
+          <div class="action-row">
+            <button class="action" id="lambdaNext">Langkah 1 · Deteksi nullable</button>
+            <button class="action secondary" id="lambdaReset">Reset</button>
           </div>
-
-          <p id="u-log" class="mt-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-            Klik <strong>"Jalankan Propagasi Node"</strong> untuk melihat bola cahaya menyalin produksi terminal dari <span class="font-mono font-bold">C → B → A → S</span>.
-          </p>
+          <div class="status" id="lambdaStatus">Mulai dengan mencari variabel yang dapat menghasilkan λ.</div>
+        </div>
+        <div class="card soft">
+          <div class="stage-title">Proses bertahap</div>
+          <div class="stage" style="min-height:110px">
+            <div class="small">Himpunan nullable (Vₙ)</div>
+            <div class="rule" id="nullableSet" style="margin-top:8px">Vₙ = { }</div>
+            <div class="small" id="nullableWhy">Belum ada variabel yang ditandai.</div>
+          </div>
+          <div class="stage" style="margin-top:12px;min-height:130px">
+            <div class="small">Alternatif produksi setelah substitusi</div>
+            <div class="rule" id="lambdaVariants" style="margin-top:8px">S → AB</div>
+            <div class="small" id="lambdaExplain">Klik langkah berikutnya untuk melihat variasi aturan.</div>
+          </div>
         </div>
       </div>
+      <div class="callout" style="margin-top:15px">Pada contoh ini hanya A yang nullable. B tidak nullable, sehingga S tidak dapat menghasilkan λ. Karena λ ∉ L(G), kita tidak perlu mempertahankan produksi λ pada simbol awal.</div>
     </section>
 
-    <!-- ==================== SLIDE 5: USELESS PRODUCTIONS - TAHAP 1: NON-GENERATING ==================== -->
-    <section class="slide" id="slide-4">
-      <div class="mb-5">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
-          <span>Tahap 3A • Teorema 6.2</span>
+    <!-- 4 -->
+    <section class="slide">
+      <div class="kicker">Tahap 2 · Theorem 6.4</div>
+      <h2>Eliminasi unit-productions</h2>
+      <p class="lead">Produksi unit berbentuk <span class="rule">A → B</span>, dengan A dan B variabel. Telusuri semua variabel yang dapat dicapai melalui rantai unit, lalu salin produksi non-unit ke variabel asal.</p>
+      <div class="grid two" style="margin-top:20px;align-items:start">
+        <div class="card">
+          <div class="stage-title">Grammar awal</div>
+          <div class="rule-list rule">
+            <div class="rule-row"><span class="lhs">S →</span><span class="token warn">A</span></div>
+            <div class="rule-row"><span class="lhs">A →</span><span class="token warn">B</span></div>
+            <div class="rule-row"><span class="lhs">B →</span><span>b</span><span>|</span><span class="token warn">C</span></div>
+            <div class="rule-row"><span class="lhs">C →</span><span>c</span></div>
+          </div>
+          <div class="action-row">
+            <button class="action" id="unitNext">Jalankan propagasi</button>
+            <button class="action secondary" id="unitReset">Reset</button>
+          </div>
+          <div class="status" id="unitStatus">Rantai unit: S → A → B → C</div>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Useless Productions: Non-Generating Symbols</h2>
-        <p class="text-slate-600 dark:text-slate-400 mt-1 text-sm sm:text-base">
-          Variabel harus mampu menurunkan string terminal murni (<span class="font-mono">V ⇒* w ∈ T*</span>). Variabel yang terjebak siklus tanpa ujung terminal wajib dibuang.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        <!-- Left: Interactive Node & Rules -->
-        <div class="lg:col-span-7 glass-card rounded-3xl p-6">
-          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-200/80 dark:border-slate-800">
-            <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Deteksi & Eliminasi Variabel Generating</span>
-            <div class="flex items-center gap-2">
-              <button id="btn-gen-run" onclick="event.stopPropagation(); runGeneratingTest();"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-500/25 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer">
-                <i data-lucide="play" class="w-4 h-4"></i>
-                <span>Uji Variabel Generating</span>
-              </button>
-              <button id="btn-gen-reset" onclick="event.stopPropagation(); resetGeneratingTest();"
-                class="hidden inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm transition-all cursor-pointer">
-                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                <span>Reset</span>
-              </button>
-            </div>
+        <div class="card soft">
+          <div class="stage-title">Graf ketergantungan unit</div>
+          <div class="graph" id="unitGraph">
+            <div class="graph-item"><div class="node start" id="unS">S</div><div class="graph-label">awal</div></div><div class="edge"></div>
+            <div class="graph-item"><div class="node" id="unA">A</div><div class="graph-label">unit</div></div><div class="edge"></div>
+            <div class="graph-item"><div class="node" id="unB">B</div><div class="graph-label">unit</div></div><div class="edge"></div>
+            <div class="graph-item"><div class="node" id="unC">C</div><div class="graph-label">unit</div></div>
           </div>
-
-          <!-- Visual Node Cards -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-            <div id="gcard-S" class="p-3.5 rounded-2xl bg-slate-100/90 dark:bg-slate-900/90 border-2 border-slate-200 dark:border-slate-800 text-center">
-              <div class="w-10 h-10 mx-auto rounded-full bg-indigo-600 text-white font-mono font-bold flex items-center justify-center mb-1.5">S</div>
-              <div id="gstat-S" class="font-mono text-[11px] text-slate-400">Menunggu...</div>
-            </div>
-            <div id="gcard-A" class="p-3.5 rounded-2xl bg-slate-100/90 dark:bg-slate-900/90 border-2 border-slate-200 dark:border-slate-800 text-center">
-              <div class="w-10 h-10 mx-auto rounded-full bg-slate-700 text-white font-mono font-bold flex items-center justify-center mb-1.5">A</div>
-              <div id="gstat-A" class="font-mono text-[11px] text-slate-400">Menunggu...</div>
-            </div>
-            <div id="gcard-B" class="p-3.5 rounded-2xl bg-slate-100/90 dark:bg-slate-900/90 border-2 border-slate-200 dark:border-slate-800 text-center">
-              <div class="w-10 h-10 mx-auto rounded-full bg-slate-700 text-white font-mono font-bold flex items-center justify-center mb-1.5">B</div>
-              <div id="gstat-B" class="font-mono text-[11px] text-slate-400">Menunggu...</div>
-            </div>
-            <div id="gcard-C" class="p-3.5 rounded-2xl bg-slate-100/90 dark:bg-slate-900/90 border-2 border-slate-200 dark:border-slate-800 text-center">
-              <div class="w-10 h-10 mx-auto rounded-full bg-slate-700 text-white font-mono font-bold flex items-center justify-center mb-1.5">C</div>
-              <div id="gstat-C" class="font-mono text-[11px] text-slate-400">Menunggu...</div>
-            </div>
-          </div>
-
-          <!-- Production Rules -->
-          <div class="space-y-2.5 font-mono text-base">
-            <div class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
-              <span class="font-bold text-indigo-600 dark:text-indigo-400">S →</span>
-              <span>aS | A</span>
-              <span id="gr-S-C" class="rule-pill bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">| C</span>
-            </div>
-            <div class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
-              <span class="font-bold text-indigo-600 dark:text-indigo-400">A →</span>
-              <span>a</span>
-            </div>
-            <div class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
-              <span class="font-bold text-indigo-600 dark:text-indigo-400">B →</span>
-              <span>aa</span>
-            </div>
-            <div id="gr-row-C" class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
-              <span class="font-bold text-indigo-600 dark:text-indigo-400">C →</span>
-              <span>aCb</span>
-              <span class="ml-auto text-xs text-slate-400">(rekursi tanpa terminal)</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Explanation & Generating Set -->
-        <div class="lg:col-span-5 glass-card rounded-3xl p-6 flex flex-col justify-between">
-          <div>
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2.5">Himpunan Variabel Generating (V_G)</span>
-            <div id="gen-set-display" class="p-4 rounded-2xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 font-mono text-lg font-bold text-slate-400 mb-5">
-              V_G = { ? }
-            </div>
-
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2">Analisis Langkah</span>
-            <p id="gen-log" class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Klik <strong>"Uji Variabel Generating"</strong> untuk melihat iterasi penemuan simbol penghasil terminal (<span class="font-mono">A</span> dan <span class="font-mono">B</span>), propagasi ke <span class="font-mono">S</span>, serta eliminasi <span class="font-mono">C</span>.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-            <strong class="text-indigo-600 dark:text-indigo-400">Catatan Penting:</strong> Variabel <span class="font-mono font-bold">B → aa</span> lolos tahap ini karena menghasilkan terminal <span class="font-mono">aa</span>, meskipun <span class="font-mono">B</span> tidak terhubung dari <span class="font-mono">S</span> (akan dibuang pada Slide berikutnya).
+          <div class="stage">
+            <div class="small">Produksi non-unit yang disalin ke setiap variabel pada rantai</div>
+            <div class="rule" id="unitResult" style="margin-top:8px">Menunggu simulasi…</div>
           </div>
         </div>
       </div>
+      <div class="callout" style="margin-top:15px">Untuk menghindari rantai atau siklus unit yang tidak pernah berakhir, buku menggunakan keterjangkauan pada graf unit: salin semua produksi non-unit dari setiap variabel yang dapat dicapai.</div>
     </section>
 
-    <!-- ==================== SLIDE 6: USELESS PRODUCTIONS - TAHAP 2: UNREACHABLE (BFS RADAR) ==================== -->
-    <section class="slide" id="slide-5">
-      <div class="mb-5">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
-          <span>Tahap 3B • Teorema 6.1</span>
-        </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Useless Productions: Unreachable Symbols</h2>
-        <p class="text-slate-600 dark:text-slate-400 mt-1 text-sm sm:text-base">
-          Pancarkan penelusuran dari simbol awal <span class="font-mono">S</span>. Seluruh node variabel yang tidak tersentuh gelombang BFS wajib dipangkas.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        <!-- Left: SVG Radar BFS Graph -->
-        <div class="lg:col-span-7 glass-card rounded-3xl p-6">
-          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-200/80 dark:border-slate-800">
-            <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Graf Keterjangkauan Berarah dari S</span>
-            <div class="flex items-center gap-2">
-              <button id="btn-bfs-run" onclick="event.stopPropagation(); runBfsRadar();"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer">
-                <i data-lucide="radar" class="w-4 h-4"></i>
-                <span>Jalankan Gelombang BFS dari S</span>
-              </button>
-              <button id="btn-bfs-reset" onclick="event.stopPropagation(); resetBfsRadar();"
-                class="hidden inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm transition-all cursor-pointer">
-                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                <span>Reset Graf</span>
-              </button>
-            </div>
+    <!-- 5 -->
+    <section class="slide">
+      <div class="kicker">Tahap 3A · Theorem 6.2</div>
+      <h2>Useless symbols: non-generating</h2>
+      <p class="lead">Variabel <em>generating</em> jika dapat menghasilkan suatu string terminal. Variabel yang tidak dapat mencapai string terminal adalah <em>useless</em>.</p>
+      <div class="grid two" style="margin-top:20px;align-items:start">
+        <div class="card">
+          <div class="stage-title">Grammar awal</div>
+          <div class="rule-list rule">
+            <div class="rule-row"><span class="lhs">S →</span><span>aS</span><span>|</span><span>A</span><span>|</span><span class="token bad">C</span></div>
+            <div class="rule-row"><span class="lhs">A →</span><span class="token good">a</span></div>
+            <div class="rule-row"><span class="lhs">B →</span><span class="token good">aa</span></div>
+            <div class="rule-row"><span class="lhs">C →</span><span class="token bad">aCb</span></div>
           </div>
-
-          <svg class="w-full h-[270px] rounded-2xl svg-stage overflow-visible" viewBox="0 0 560 270">
-            <defs>
-              <marker id="bfs-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L8,3 z" fill="#64748B" />
-              </marker>
-              <marker id="bfs-arr-em" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L8,3 z" fill="#10B981" />
-              </marker>
-            </defs>
-
-            <!-- Self loop on S -->
-            <path id="bfs-loop-S" d="M 85 72 C 62 22, 130 22, 110 72" fill="none" stroke="#64748B" stroke-width="2.5" marker-end="url(#bfs-arr)" />
-            <text x="96" y="26" text-anchor="middle" fill="#64748B" class="font-mono text-[11px]">S → aS</text>
-
-            <!-- Edge S -> A -->
-            <line id="bfs-edge-SA" x1="124" y1="96" x2="256" y2="96" stroke="#64748B" stroke-width="3" marker-end="url(#bfs-arr)" />
-            <!-- Edge A -> terminal a -->
-            <line id="bfs-edge-Aa" x1="314" y1="96" x2="432" y2="96" stroke="#64748B" stroke-width="3" marker-end="url(#bfs-arr)" />
-
-            <!-- Isolated Subgraph: Node B -> Node D -->
-            <g id="bfs-isolated-group">
-              <line id="bfs-edge-BD" x1="210" y1="205" x2="362" y2="205" stroke="#64748B" stroke-width="3" marker-end="url(#bfs-arr)" />
-              <text x="286" y="193" text-anchor="middle" fill="#64748B" class="font-mono text-[11px]">B → D</text>
-
-              <g transform="translate(180, 205)">
-                <circle id="bfs-circ-B" r="24" class="fill-white dark:fill-slate-900 stroke-slate-500" stroke-width="2.5" />
-                <text y="6" text-anchor="middle" class="fill-slate-800 dark:fill-slate-200 font-mono font-bold text-base">B</text>
-              </g>
-              <g transform="translate(392, 205)">
-                <circle id="bfs-circ-D" r="24" class="fill-white dark:fill-slate-900 stroke-slate-500" stroke-width="2.5" />
-                <text y="6" text-anchor="middle" class="fill-slate-800 dark:fill-slate-200 font-mono font-bold text-base">D</text>
-              </g>
-              <text id="bfs-iso-tag" x="95" y="209" text-anchor="middle" fill="#64748B" class="font-mono text-[11px]">Tanpa jalur masuk</text>
-            </g>
-
-            <!-- Radar Pulse Rings -->
-            <circle id="radar-S" cx="96" cy="96" r="26" fill="none" stroke="#10B981" stroke-width="3" style="opacity: 0;" />
-            <circle id="radar-A" cx="285" cy="96" r="26" fill="none" stroke="#10B981" stroke-width="3" style="opacity: 0;" />
-
-            <!-- Reachable Nodes S, A, terminal a -->
-            <g transform="translate(96, 96)">
-              <circle id="bfs-circ-S" r="26" class="fill-white dark:fill-slate-900 stroke-indigo-600" stroke-width="3" />
-              <text y="6" text-anchor="middle" class="fill-slate-900 dark:fill-white font-mono font-bold text-lg">S</text>
-            </g>
-            <g transform="translate(285, 96)">
-              <circle id="bfs-circ-A" r="26" class="fill-white dark:fill-slate-900 stroke-slate-500" stroke-width="3" />
-              <text y="6" text-anchor="middle" class="fill-slate-900 dark:fill-white font-mono font-bold text-lg">A</text>
-            </g>
-            <g transform="translate(462, 96)">
-              <rect id="bfs-rect-a" x="-22" y="-22" width="44" height="44" rx="12" class="fill-white dark:fill-slate-900 stroke-slate-500" stroke-width="2.5" />
-              <text y="6" text-anchor="middle" class="fill-slate-900 dark:fill-white font-mono font-bold text-base">a</text>
-            </g>
-          </svg>
-        </div>
-
-        <!-- Right: Reachable Summary & Rules -->
-        <div class="lg:col-span-5 glass-card rounded-3xl p-6 flex flex-col justify-between">
-          <div>
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-3">Status Simbol & Aturan Produksi</span>
-            <div class="space-y-2.5 font-mono text-base">
-              <div class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                <span><strong class="text-indigo-600 dark:text-indigo-400">S →</strong> aS | A</span>
-                <span id="bfs-tag-S" class="text-xs text-slate-400">Start</span>
-              </div>
-              <div class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                <span><strong class="text-indigo-600 dark:text-indigo-400">A →</strong> a</span>
-                <span id="bfs-tag-A" class="text-xs text-slate-400">Pending</span>
-              </div>
-              <div id="bfs-rule-B" class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                <span><strong class="text-indigo-600 dark:text-indigo-400">B →</strong> D | aa</span>
-                <span id="bfs-tag-B" class="text-xs text-slate-400">Pending</span>
-              </div>
-              <div id="bfs-rule-D" class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                <span><strong class="text-indigo-600 dark:text-indigo-400">D →</strong> d</span>
-                <span id="bfs-tag-D" class="text-xs text-slate-400">Pending</span>
-              </div>
-            </div>
+          <div class="action-row">
+            <button class="action" id="genNext">Uji variabel generating</button>
+            <button class="action secondary" id="genReset">Reset</button>
           </div>
-
-          <p id="bfs-log" class="mt-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-            Klik <strong>"Jalankan Gelombang BFS dari S"</strong> untuk memancarkan gelombang keterjangkauan dan memangkas subgraf terisolasi <span class="font-mono font-bold">{B, D}</span>.
-          </p>
+          <div class="status" id="genStatus">Periksa aturan yang seluruh hasil akhirnya terminal.</div>
+        </div>
+        <div class="card soft">
+          <div class="stage-title">Iterasi himpunan generating (Vg)</div>
+          <div class="stage">
+            <div class="small">Variabel yang sudah terbukti generating</div>
+            <div class="rule" id="genSet" style="margin-top:8px">Vg = { }</div>
+            <div class="small" id="genNote">Belum ada variabel yang ditambahkan.</div>
+          </div>
+          <div class="stage" style="margin-top:12px">
+            <div class="small">Setelah C dihapus</div>
+            <div class="rule" id="genResult" style="margin-top:8px">S → aS | A | C<br>A → a<br>B → aa</div>
+          </div>
         </div>
       </div>
+      <div class="callout warn" style="margin-top:15px">B termasuk generating karena B → aa, tetapi belum tentu useful. “Generating” saja belum cukup: variabel juga harus dapat dicapai dari simbol awal.</div>
     </section>
 
-    <!-- ==================== SLIDE 7: STUDI KASUS LENGKAP END-TO-END ==================== -->
-    <section class="slide" id="slide-6">
-      <div class="mb-5">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 text-xs font-bold uppercase tracking-wider mb-2">
-          <span>Simulasi Terpadu End-to-End</span>
+    <!-- 6 -->
+    <section class="slide">
+      <div class="kicker">Tahap 3B · Theorem 6.2</div>
+      <h2>Useless symbols: unreachable</h2>
+      <p class="lead">Setelah variabel non-generating dibuang, telusuri graf dependensi dari simbol awal S. Variabel yang tidak dapat dicapai dari S dan produksi terkaitnya dihapus.</p>
+      <div class="grid two" style="margin-top:20px;align-items:center">
+        <div class="card">
+          <div class="stage-title">Graf keterjangkauan dari S</div>
+          <div class="graph" style="gap:16px">
+            <div class="graph-item"><div class="node start" id="reachS">S</div><div class="graph-label">start</div></div>
+            <div class="edge"></div>
+            <div class="graph-item"><div class="node" id="reachA">A</div><div class="graph-label">terjangkau</div></div>
+            <div style="width:20px"></div>
+            <div class="graph-item"><div class="node dim" id="reachB">B</div><div class="graph-label">terisolasi</div></div>
+          </div>
+          <div class="action-row">
+            <button class="action" id="bfsNext">Jalankan BFS dari S</button>
+            <button class="action secondary" id="bfsReset">Reset</button>
+          </div>
+          <div class="status" id="bfsStatus">Mulai penelusuran dari simbol awal S.</div>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Studi Kasus Penyederhanaan Lengkap</h2>
-        <p class="text-slate-600 dark:text-slate-400 mt-1 text-sm sm:text-base">
-          Transformasi menyeluruh satu tata bahasa mentah melewati seluruh 3 fase hingga siap dikonversi ke <strong>Chomsky Normal Form (CNF)</strong>.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        <!-- Left: Animated Rules Deck -->
-        <div class="lg:col-span-7 glass-card rounded-3xl p-6">
-          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-200/80 dark:border-slate-800">
-            <span id="e2e-badge" class="font-mono text-sm font-bold text-indigo-600 dark:text-indigo-400">
-              Kondisi Awal: Tata Bahasa G
-            </span>
-            <button id="btn-e2e-step" onclick="event.stopPropagation(); nextEndToEndPhase();"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer">
-              <i data-lucide="play" class="w-4 h-4"></i>
-              <span>Jalankan Fase 1: Hapus λ</span>
-            </button>
+        <div class="card soft">
+          <div class="stage-title">Hasil penelusuran</div>
+          <div class="stage">
+            <div class="small">Himpunan reachable (Vᵣ)</div>
+            <div class="rule" id="reachSet" style="margin-top:8px">Vᵣ = {S}</div>
           </div>
-
-          <div id="e2e-cards" class="space-y-3 font-mono text-sm sm:text-base">
-            <!-- Dynamically populated & animated by GSAP -->
-          </div>
-        </div>
-
-        <!-- Right: Phase Tracker & Detailed Log -->
-        <div class="lg:col-span-5 glass-card rounded-3xl p-6 flex flex-col justify-between">
-          <div>
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-3">Progres Fase Penyederhanaan</span>
-            <div class="space-y-2 mb-6">
-              <div id="e2e-pill-1" class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold">
-                <span>Fase 1: Eliminasi λ-Productions</span>
-                <span class="font-mono text-slate-400">Menunggu</span>
-              </div>
-              <div id="e2e-pill-2" class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold">
-                <span>Fase 2: Eliminasi Unit Productions</span>
-                <span class="font-mono text-slate-400">Menunggu</span>
-              </div>
-              <div id="e2e-pill-3" class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold">
-                <span>Fase 3: Eliminasi Useless Symbols</span>
-                <span class="font-mono text-slate-400">Menunggu</span>
-              </div>
-            </div>
-
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2">Catatan Transformasi</span>
-            <p id="e2e-log" class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              <!-- Populated by JS -->
-            </p>
-          </div>
-
-          <div class="pt-4 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs font-mono text-slate-500">
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Aturan Baru</span>
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> Dieliminasi</span>
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Nullable</span>
+          <div class="stage" style="margin-top:12px">
+            <div class="small">Grammar setelah simbol unreachable dihapus</div>
+            <div class="rule" id="reachResult" style="margin-top:8px">S → aS | A<br>A → a</div>
           </div>
         </div>
       </div>
+      <div class="callout" style="margin-top:15px">Contoh: B → aa dapat menghasilkan string terminal, tetapi tidak ada jalur dari S menuju B. Karena itu B dan produksinya tetap dibuang.</div>
     </section>
 
+    <!-- 7 -->
+    <section class="slide">
+      <div class="kicker">Studi kasus · Transformasi terpadu</div>
+      <h2>Satu grammar, tiga tahap</h2>
+      <p class="lead">Ikuti satu contoh dari grammar awal hingga tidak memiliki λ-productions, unit-productions, atau variabel yang tidak berguna.</p>
+      <div class="card" style="margin-top:16px">
+        <div class="stage-title">Grammar awal G</div>
+        <div class="rule">S → AB | aA | c<br>A → aA | a | λ<br>B → bB | b<br>C → cC | c</div>
+      </div>
+      <div class="steps" id="caseSteps">
+        <span class="step current" id="caseStep1"><b>1</b> λ-productions</span>
+        <span class="arrow">→</span><span class="step" id="caseStep2"><b>2</b> Unit-productions</span>
+        <span class="arrow">→</span><span class="step" id="caseStep3"><b>3</b> Useless</span>
+      </div>
+      <div class="grid two">
+        <div class="card soft">
+          <div class="stage-title">Grammar saat ini</div>
+          <div class="rule" id="caseGrammar">S → AB | aA | c<br>A → aA | a | λ<br>B → bB | b<br>C → cC | c</div>
+        </div>
+        <div class="card">
+          <div class="stage-title">Catatan transformasi</div>
+          <p id="caseExplain" class="small" style="font-size:13px;color:var(--ink)">Tahap 1: A nullable. Pada S → AB, hilangkan A untuk memperoleh alternatif S → B. Pada aA, hilangkan A untuk memperoleh a.</p>
+          <div class="action-row">
+            <button class="action" id="caseNext">Jalankan fase 1</button>
+            <button class="action secondary" id="caseReset">Ulangi</button>
+          </div>
+          <div class="status" id="caseStatus">Fase 1 dari 3</div>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:14px">S tidak nullable karena setiap derivasi dari S tetap harus menghasilkan terminal c atau setidaknya satu b. Jadi λ tidak termasuk L(G), sesuai asumsi teorema untuk contoh ini.</div>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide">
+      <div class="kicker">Cek pemahaman</div>
+      <h2>Uji konsep dalam 30 detik</h2>
+      <p class="lead">Pilih jawaban untuk setiap pertanyaan. Penjelasan akan muncul setelah kamu memilih.</p>
+      <div class="grid two" style="margin-top:18px;align-items:start">
+        <div class="card">
+          <span class="pill">Pertanyaan 1</span>
+          <h3 style="margin-top:12px">Manakah bentuk unit-production?</h3>
+          <button class="quiz-option" data-q="1" data-a="0">A → aB</button>
+          <button class="quiz-option" data-q="1" data-a="1">A → B</button>
+          <button class="quiz-option" data-q="1" data-a="0">A → ab</button>
+          <div class="small" id="quiz1"></div>
+        </div>
+        <div class="card">
+          <span class="pill">Pertanyaan 2</span>
+          <h3 style="margin-top:12px">B → bb, tetapi B tidak dapat dicapai dari S. Apa status B?</h3>
+          <button class="quiz-option" data-q="2" data-a="0">Non-generating</button>
+          <button class="quiz-option" data-q="2" data-a="1">Generating tetapi unreachable</button>
+          <button class="quiz-option" data-q="2" data-a="0">Nullable</button>
+          <div class="small" id="quiz2"></div>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:16px">Ingat: variabel useful harus memenuhi dua hal sekaligus—dapat menghasilkan string terminal dan dapat dicapai dari simbol awal.</div>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide">
+      <div class="kicker">Rangkuman</div>
+      <h2>Inti penyederhanaan CFG</h2>
+      <div class="grid two" style="margin-top:18px">
+        <div class="card dark">
+          <div class="pill" style="background:#d8f5ef;color:#0b665d">Theorem 6.5</div>
+          <h3 style="font-size:22px;margin-top:14px">Grammar dapat dibuat bebas dari tiga jenis produksi tak diinginkan.</h3>
+          <p class="muted">Untuk bahasa context-free yang tidak memuat λ, ada grammar ekuivalen tanpa useless productions, λ-productions, dan unit-productions.</p>
+        </div>
+        <div class="card">
+          <h3>Urutan yang perlu diingat</h3>
+          <ol class="list">
+            <li>Remove λ-productions.</li>
+            <li>Remove unit-productions.</li>
+            <li>Remove useless productions.</li>
+          </ol>
+          <p class="small">Penghapusan useless symbols dilakukan dengan dua pemeriksaan: non-generating terlebih dahulu, lalu unreachable.</p>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:18px"><b>Referensi materi:</b> Peter Linz, <em>An Introduction to Formal Languages and Automata</em>, Chapter 6, Section 6.1 — “Methods for Transforming Grammars”, khususnya Theorems 6.1–6.5.</div>
+      <div style="margin-top:auto;padding-top:24px;text-align:center">
+        <div style="font-size:clamp(34px,5vw,58px);font-weight:900;letter-spacing:-.05em;color:var(--teal)">Terima kasih.</div>
+        <p class="muted">Ada pertanyaan?</p>
+      </div>
+    </section>
   </main>
-
-  <!-- Bottom 3px Progress Bar & Minimal Counter -->
-  <div class="fixed bottom-0 left-0 right-0 h-[3px] bg-slate-200/70 dark:bg-slate-800/80 z-50 pointer-events-none">
-    <div id="progress-bar" class="h-full w-[14.28%] bg-gradient-to-r from-indigo-600 via-violet-500 to-emerald-500"></div>
-  </div>
-  <div id="slide-counter" class="fixed bottom-3 right-5 px-3 py-1 rounded-full glass-card font-mono text-xs font-bold text-slate-500 dark:text-slate-400 z-50 pointer-events-none">
-    1 / 7
-  </div>
-
-  <script>
-    // Initialize Lucide Icons & Register GSAP MotionPathPlugin
-    lucide.createIcons();
-    gsap.registerPlugin(MotionPathPlugin);
-
-    // ==================== SLIDE NAVIGATION & THEME ====================
-    const slides = document.querySelectorAll('.slide');
-    const totalSlides = slides.length;
-    let currentSlide = 0;
-
-    function goToSlide(nextIndex) {
-      if (nextIndex < 0 || nextIndex >= totalSlides || nextIndex === currentSlide) return;
-
-      const outgoing = slides[currentSlide];
-      const incoming = slides[nextIndex];
-      const dir = nextIndex > currentSlide ? 1 : -1;
-      currentSlide = nextIndex;
-
-      gsap.to(outgoing, {
-        opacity: 0,
-        y: -24 * dir,
-        scale: 0.98,
-        duration: 0.32,
-        ease: 'power2.in',
-        onComplete: () => {
-          outgoing.classList.remove('active');
-        }
-      });
-
-      incoming.classList.add('active');
-      gsap.fromTo(incoming,
-        { opacity: 0, y: 28 * dir, scale: 0.98 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'power3.out' }
-      );
-
-      document.getElementById('slide-counter').textContent = `${currentSlide + 1} / ${totalSlides}`;
-      gsap.to('#progress-bar', {
-        width: `${((currentSlide + 1) / totalSlides) * 100}%`,
-        duration: 0.45,
-        ease: 'power2.out'
-      });
-    }
-
-    // Click empty area on deck to advance slide
-    document.getElementById('deck').addEventListener('click', (e) => {
-      if (e.target.closest('button')) return;
-      if (currentSlide < totalSlides - 1) {
-        goToSlide(currentSlide + 1);
-      }
-    });
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-      if (['ArrowRight', 'Space', ' ', 'PageDown'].includes(e.key)) {
-        e.preventDefault();
-        goToSlide(currentSlide + 1);
-      } else if (['ArrowLeft', 'Backspace', 'PageUp'].includes(e.key)) {
-        e.preventDefault();
-        goToSlide(currentSlide - 1);
-      } else if (e.key.toLowerCase() === 'f') {
-        toggleFullscreen();
-      } else if (e.key.toLowerCase() === 't') {
-        toggleTheme();
-      }
-    });
-
-    function toggleTheme() {
-      document.documentElement.classList.toggle('dark');
-    }
-
-    function toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen().catch(() => {});
-      }
-    }
-
-    // ==================== SLIDE 1: AMBIENT & KINETIC ENTRANCE ====================
-    function initSlide1Animations() {
-      gsap.from('.hero-stagger', {
-        y: 26,
-        opacity: 0,
-        duration: 0.75,
-        stagger: 0.12,
-        ease: 'power3.out'
-      });
-
-      const nodes = Array.from(document.querySelectorAll('#hero-constellation .const-node'));
-      const lines = Array.from(document.querySelectorAll('#hero-constellation .const-line path'));
-      const links = [[0, 1], [0, 2], [1, 3], [1, 4], [2, 5], [2, 6]];
-
-      // Latar opak di belakang node kotak (fill-nya transparan) supaya garis tidak tembus
-      nodes.forEach(n => {
-        const rect = n.querySelector('rect');
-        if (!rect) return;
-        const back = rect.cloneNode();
-        back.setAttribute('class', 'fill-slate-50 dark:fill-slate-950');
-        back.removeAttribute('stroke');
-        n.insertBefore(back, rect);
-      });
-
-      // Garis selalu menempel ke posisi node yang sedang melayang
-      const syncLines = () => {
-        links.forEach(([i, j], k) => {
-          const x1 = gsap.getProperty(nodes[i], 'x'), y1 = gsap.getProperty(nodes[i], 'y');
-          const x2 = gsap.getProperty(nodes[j], 'x'), y2 = gsap.getProperty(nodes[j], 'y');
-          lines[k].setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
-        });
-      };
-      syncLines();
-      gsap.ticker.add(syncLines);
-
-      gsap.to('.const-node', {
-        y: '+=8',
-        duration: 2.6,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
-        stagger: { each: 0.25, from: 'random' }
-      });
-
-      gsap.to('.const-line path', {
-        strokeDashoffset: -24,
-        duration: 1.8,
-        repeat: -1,
-        ease: 'none'
-      });
-    }
-
-    // ==================== SLIDE 2: EFEK DOMINO PIPELINE ====================
-    let dominoTl = null;
-    function runDominoSimulation() {
-      if (dominoTl) dominoTl.kill();
-      resetDominoVisuals();
-
-      const btn = document.getElementById('btn-domino');
-      btn.disabled = true;
-      btn.classList.add('opacity-60');
-
-      dominoTl = gsap.timeline({
-        onComplete: () => {
-          btn.disabled = false;
-          btn.classList.remove('opacity-60');
-          document.getElementById('btn-domino-reset').classList.remove('hidden');
-        }
-      });
-
-      dominoTl
-        .to('#dom-card-1', { borderColor: '#F43F5E', y: -6, boxShadow: '0 16px 32px -10px rgba(244,63,94,0.28)', duration: 0.35 })
-        .to('#dom-energy-bar', { width: '36%', duration: 0.45, ease: 'power2.out' })
-        .to('#dom-card-2', { opacity: 1, borderColor: '#4F46E5', y: -6, boxShadow: '0 16px 32px -10px rgba(79,70,229,0.28)', duration: 0.35 })
-        .to('#dom-energy-bar', { width: '70%', duration: 0.45, ease: 'power2.out' })
-        .to('#dom-card-3', { opacity: 1, borderColor: '#10B981', y: -6, boxShadow: '0 16px 32px -10px rgba(16,185,129,0.28)', duration: 0.35 })
-        .to('#dom-energy-bar', { width: '100%', duration: 0.45, ease: 'power2.out' })
-        .to('#dom-warning', { opacity: 1, scale: 1.01, duration: 0.35, yoyo: true, repeat: 1 });
-    }
-
-    function resetDominoVisuals() {
-      gsap.set(['#dom-card-1', '#dom-card-2', '#dom-card-3'], { clearProps: 'all' });
-      document.getElementById('dom-card-2').classList.add('opacity-50');
-      document.getElementById('dom-card-3').classList.add('opacity-50');
-      gsap.set('#dom-energy-bar', { width: '0%' });
-    }
-
-    function resetDominoSimulation() {
-      if (dominoTl) dominoTl.kill();
-      resetDominoVisuals();
-      document.getElementById('btn-domino-reset').classList.add('hidden');
-    }
-
-    // ==================== SLIDE 3: ELIMINASI LAMBDA-PRODUCTIONS ====================
-    let lamStep = 0;
-    function nextLambdaStep() {
-      lamStep++;
-      const btn = document.getElementById('btn-lam-step');
-      const log = document.getElementById('lam-log');
-
-      if (lamStep === 1) {
-        document.getElementById('nullable-placeholder').classList.add('hidden');
-        ['nb-token-A', 'nb-token-B', 'nb-token-S'].forEach(id => {
-          document.getElementById(id).classList.remove('hidden');
-        });
-        gsap.from(['#nb-token-A', '#nb-token-B', '#nb-token-S'], {
-          scale: 0.4,
-          y: -25,
-          opacity: 0,
-          duration: 0.45,
-          stagger: 0.14,
-          ease: 'back.out(1.7)'
-        });
-
-        document.getElementById('lam-a-lam').classList.add('!bg-amber-500/20', '!text-amber-600', 'dark:!text-amber-400', '!border-amber-500/40');
-        document.getElementById('lam-b-lam').classList.add('!bg-amber-500/20', '!text-amber-600', 'dark:!text-amber-400', '!border-amber-500/40');
-
-        document.getElementById('lam-ind-1').classList.replace('text-slate-400', 'text-amber-500');
-        log.innerHTML = '<strong>Langkah 1:</strong> Variabel <span class="font-mono font-bold text-amber-500">A</span> dan <span class="font-mono font-bold text-amber-500">B</span> menurunkan <span class="font-mono">λ</span> secara langsung, sedangkan <span class="font-mono font-bold text-indigo-500">S → AB</span> bersifat nullable secara tidak langsung.';
-        btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i><span>Langkah 2: Pecah Kombinasi</span>';
-        lucide.createIcons();
-      } else if (lamStep === 2) {
-        const newPills = ['lam-s-comb1', 'lam-s-comb2', 'lam-s-comb3', 'lam-a-new', 'lam-b-new'];
-        newPills.forEach(id => document.getElementById(id).classList.remove('hidden'));
-        gsap.from(newPills.map(id => `#${id}`), {
-          scale: 0.7,
-          opacity: 0,
-          duration: 0.4,
-          stagger: 0.08,
-          ease: 'back.out(1.6)'
-        });
-
-        document.getElementById('lam-ind-2').classList.replace('text-slate-400', 'text-emerald-500');
-        log.innerHTML = '<strong>Langkah 2:</strong> Aturan <span class="font-mono">S → AB</span> dipecah menjadi seluruh kombinasi <span class="font-mono text-emerald-500 font-bold">AB | A | B</span> (tanpa <span class="font-mono">S → λ</span>). Demikian pula <span class="font-mono">A → aA | a</span> dan <span class="font-mono">B → bB | b</span>.';
-        btn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i><span>Langkah 3: Hapus Aturan λ</span>';
-        btn.classList.replace('bg-indigo-600', 'bg-rose-600');
-        btn.classList.replace('hover:bg-indigo-700', 'hover:bg-rose-700');
-        lucide.createIcons();
-      } else if (lamStep === 3) {
-        const targets = ['#lam-a-lam', '#lam-b-lam', '#lam-s-comb3'];
-        targets.forEach(sel => {
-          const el = document.querySelector(sel);
-          el.classList.add('line-through', '!bg-rose-500/15', '!text-rose-500', '!border-rose-500/30');
-        });
-        gsap.to(targets, {
-          opacity: 0.35,
-          scale: 0.92,
-          duration: 0.45,
-          ease: 'power2.out'
-        });
-
-        document.getElementById('lam-ind-3').classList.replace('text-slate-400', 'text-rose-500');
-        log.innerHTML = '<strong class="text-emerald-600 dark:text-emerald-400">Tahap 1 Selesai!</strong> Seluruh produksi <span class="font-mono">→ λ</span> telah dicoret dan dieliminasi. Perhatikan munculnya unit production baru <span class="font-mono font-bold text-indigo-500">S → A | B</span>!';
-        btn.classList.add('hidden');
-        document.getElementById('btn-lam-reset').classList.remove('hidden');
-      }
-    }
-
-    function resetLambdaStep() {
-      lamStep = 0;
-      document.getElementById('nullable-placeholder').classList.remove('hidden');
-      ['nb-token-A', 'nb-token-B', 'nb-token-S'].forEach(id => {
-        const el = document.getElementById(id);
-        el.classList.add('hidden');
-        gsap.set(el, { clearProps: 'all' });
-      });
-
-      ['lam-s-comb1', 'lam-s-comb2', 'lam-s-comb3', 'lam-a-new', 'lam-b-new'].forEach(id => {
-        const el = document.getElementById(id);
-        el.classList.add('hidden');
-        el.classList.remove('line-through', 'opacity-35');
-        gsap.set(el, { clearProps: 'all' });
-      });
-
-      ['lam-a-lam', 'lam-b-lam'].forEach(id => {
-        const el = document.getElementById(id);
-        el.className = 'rule-pill bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700';
-        gsap.set(el, { clearProps: 'all' });
-      });
-
-      ['lam-ind-1', 'lam-ind-2', 'lam-ind-3'].forEach(id => {
-        const el = document.getElementById(id);
-        el.className = 'py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold';
-      });
-
-      const btn = document.getElementById('btn-lam-step');
-      btn.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer';
-      btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i><span>Langkah 1: Deteksi Nullable</span>';
-      document.getElementById('btn-lam-reset').classList.add('hidden');
-      document.getElementById('lam-log').innerHTML = 'Klik <strong>"Langkah 1: Deteksi Nullable"</strong> untuk mengidentifikasi variabel yang dapat menurunkan string kosong <span class="font-mono">λ</span> baik secara langsung maupun tidak langsung.';
-      lucide.createIcons();
-    }
-
-    // ==================== SLIDE 4: UNIT PRODUCTIONS MOTIONPATH ====================
-    let unitTl = null;
-    function runUnitMotionPath() {
-      if (unitTl) unitTl.kill();
-      resetUnitVisuals();
-
-      const btn = document.getElementById('btn-unit-run');
-      const log = document.getElementById('u-log');
-      btn.disabled = true;
-      btn.classList.add('opacity-60');
-
-      const packet = document.getElementById('u-packet');
-      gsap.set(packet, { opacity: 1, x: 490, y: 115 });
-
-      unitTl = gsap.timeline({
-        onComplete: () => {
-          gsap.to(packet, { opacity: 0, duration: 0.3 });
-          btn.disabled = false;
-          btn.classList.remove('opacity-60');
-          document.getElementById('btn-unit-reset').classList.remove('hidden');
-          log.innerHTML = '<strong class="text-emerald-600 dark:text-emerald-400">Propagasi Selesai!</strong> Seluruh panah unit <span class="font-mono text-rose-500">S → A → B → C</span> terputus dan digantikan produksi terminal langsung.';
-        }
-      });
-
-      unitTl
-        // Hop 1: C -> B
-        .add(() => { log.innerHTML = 'Paket terminal <span class="font-mono font-bold text-emerald-500">c</span> bergerak dari <strong>C → B</strong>...'; })
-        .to(packet, {
-          motionPath: { path: '#rev-CB', align: '#rev-CB', alignOrigin: [0.5, 0.5] },
-          duration: 0.75,
-          ease: 'power2.inOut'
-        })
-        .add(() => {
-          document.getElementById('u-badge-text-B').textContent = 'b | c';
-          document.getElementById('ur-B-old').classList.add('line-through', 'opacity-40');
-          document.getElementById('ur-B-new').classList.remove('hidden');
-        })
-        .to(['#u-path-BC', '#u-lbl-BC'], { opacity: 0.15, strokeDasharray: '5 5', duration: 0.3 })
-
-        // Hop 2: B -> A
-        .add(() => { log.innerHTML = 'Paket gabungan <span class="font-mono font-bold text-emerald-500">b | c</span> bergerak dari <strong>B → A</strong>...'; })
-        .to(packet, {
-          motionPath: { path: '#rev-BA', align: '#rev-BA', alignOrigin: [0.5, 0.5] },
-          duration: 0.75,
-          ease: 'power2.inOut'
-        })
-        .fromTo('#u-badge-A', { opacity: 0, y: 186 }, { opacity: 1, y: 178, duration: 0.35, ease: 'power2.out' })
-        .add(() => {
-          document.getElementById('ur-A-old').classList.add('line-through', 'opacity-40');
-          document.getElementById('ur-A-new').classList.remove('hidden');
-        })
-        .to(['#u-path-AB', '#u-lbl-AB'], { opacity: 0.15, strokeDasharray: '5 5', duration: 0.3 })
-
-        // Hop 3: A -> S
-        .add(() => { log.innerHTML = 'Paket <span class="font-mono font-bold text-emerald-500">b | c</span> diteruskan dari <strong>A → S</strong>...'; })
-        .to(packet, {
-          motionPath: { path: '#rev-AS', align: '#rev-AS', alignOrigin: [0.5, 0.5] },
-          duration: 0.75,
-          ease: 'power2.inOut'
-        })
-        .fromTo('#u-badge-S', { opacity: 0, y: 186 }, { opacity: 1, y: 178, duration: 0.35, ease: 'power2.out' })
-        .add(() => {
-          document.getElementById('ur-S-old').classList.add('line-through', 'opacity-40');
-          document.getElementById('ur-S-new').classList.remove('hidden');
-        })
-        .to(['#u-path-SA', '#u-lbl-SA'], { opacity: 0.15, strokeDasharray: '5 5', duration: 0.3 });
-    }
-
-    function resetUnitVisuals() {
-      gsap.set('#u-packet', { opacity: 0 });
-      gsap.set(['#u-path-SA', '#u-lbl-SA', '#u-path-AB', '#u-lbl-AB', '#u-path-BC', '#u-lbl-BC'], { opacity: 1, strokeDasharray: 'none' });
-      gsap.set(['#u-badge-A', '#u-badge-S'], { opacity: 0 });
-      document.getElementById('u-badge-text-B').textContent = 'b';
-      ['S', 'A', 'B'].forEach(v => {
-        document.getElementById(`ur-${v}-old`).classList.remove('line-through', 'opacity-40');
-        document.getElementById(`ur-${v}-new`).classList.add('hidden');
-      });
-    }
-
-    function resetUnitMotionPath() {
-      if (unitTl) unitTl.kill();
-      resetUnitVisuals();
-      document.getElementById('btn-unit-reset').classList.add('hidden');
-      document.getElementById('u-log').innerHTML = 'Klik <strong>"Jalankan Propagasi Node"</strong> untuk melihat bola cahaya menyalin produksi terminal dari <span class="font-mono font-bold">C → B → A → S</span>.';
-    }
-
-    // ==================== SLIDE 5: NON-GENERATING VARIABLES ====================
-    let genTl = null;
-    function runGeneratingTest() {
-      if (genTl) genTl.kill();
-      resetGeneratingVisuals();
-
-      const btn = document.getElementById('btn-gen-run');
-      const log = document.getElementById('gen-log');
-      const setDisplay = document.getElementById('gen-set-display');
-      btn.disabled = true;
-      btn.classList.add('opacity-60');
-
-      genTl = gsap.timeline({
-        onComplete: () => {
-          btn.disabled = false;
-          btn.classList.remove('opacity-60');
-          document.getElementById('btn-gen-reset').classList.remove('hidden');
-        }
-      });
-
-      genTl
-        // Step 1: A and B light up green
-        .to(['#gcard-A', '#gcard-B'], {
-          borderColor: '#10B981',
-          backgroundColor: 'rgba(16, 185, 129, 0.12)',
-          scale: 1.04,
-          duration: 0.4,
-          stagger: 0.15
-        })
-        .add(() => {
-          document.getElementById('gstat-A').innerHTML = '<span class="text-emerald-500 font-bold">✓ a ∈ T*</span>';
-          document.getElementById('gstat-B').innerHTML = '<span class="text-emerald-500 font-bold">✓ aa ∈ T*</span>';
-          setDisplay.textContent = 'V_G = { A, B }';
-          setDisplay.classList.replace('text-slate-400', 'text-emerald-500');
-          log.innerHTML = '<strong>Iterasi 1:</strong> <span class="font-mono font-bold">A → a</span> dan <span class="font-mono font-bold">B → aa</span> langsung menghasilkan terminal murni.';
-        })
-        .to(['#gcard-A', '#gcard-B'], { scale: 1, duration: 0.25 })
-
-        // Step 2: S receives signal from A and turns green
-        .to('#gcard-S', {
-          borderColor: '#10B981',
-          backgroundColor: 'rgba(16, 185, 129, 0.12)',
-          scale: 1.04,
-          duration: 0.4
-        }, '+=0.3')
-        .add(() => {
-          document.getElementById('gstat-S').innerHTML = '<span class="text-emerald-500 font-bold">✓ via A</span>';
-          setDisplay.textContent = 'V_G = { A, B, S }';
-          log.innerHTML = '<strong>Iterasi 2:</strong> Karena <span class="font-mono font-bold">S → A</span> dan <span class="font-mono">A ∈ V_G</span>, maka <span class="font-mono font-bold text-emerald-500">S</span> ikut bersifat generating.';
-        })
-        .to('#gcard-S', { scale: 1, duration: 0.25 })
-
-        // Step 3: C shakes red and gets eliminated
-        .to('#gcard-C', {
-          borderColor: '#F43F5E',
-          backgroundColor: 'rgba(244, 63, 94, 0.14)',
-          duration: 0.25
-        }, '+=0.3')
-        .to('#gcard-C', {
-          x: -6,
-          duration: 0.07,
-          repeat: 5,
-          yoyo: true,
-          ease: 'sine.inOut'
-        })
-        .add(() => {
-          document.getElementById('gstat-C').innerHTML = '<span class="text-rose-500 font-bold">✕ Infinite Loop</span>';
-          document.getElementById('gr-S-C').classList.add('line-through', '!bg-rose-500/15', '!text-rose-500');
-          log.innerHTML = '<strong class="text-rose-500">Variabel C Dieliminasi!</strong> Aturan <span class="font-mono">C → aCb</span> tidak pernah mencapai terminal, sehingga node <span class="font-mono font-bold">C</span> dan cabang <span class="font-mono">| C</span> pada <span class="font-mono">S</span> dihapus.';
-        })
-        .to(['#gcard-C', '#gr-row-C'], {
-          opacity: 0.32,
-          scale: 0.96,
-          duration: 0.45
-        }, '+=0.35');
-    }
-
-    function resetGeneratingVisuals() {
-      ['S', 'A', 'B', 'C'].forEach(v => {
-        gsap.set(`#gcard-${v}`, { clearProps: 'all' });
-        document.getElementById(`gstat-${v}`).textContent = 'Menunggu...';
-      });
-      gsap.set('#gr-row-C', { clearProps: 'all' });
-      document.getElementById('gr-S-C').className = 'rule-pill bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700';
-      const setDisplay = document.getElementById('gen-set-display');
-      setDisplay.textContent = 'V_G = { ? }';
-      setDisplay.className = 'p-4 rounded-2xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 font-mono text-lg font-bold text-slate-400 mb-5';
-    }
-
-    function resetGeneratingTest() {
-      if (genTl) genTl.kill();
-      resetGeneratingVisuals();
-      document.getElementById('btn-gen-reset').classList.add('hidden');
-      document.getElementById('gen-log').innerHTML = 'Klik <strong>"Uji Variabel Generating"</strong> untuk melihat iterasi penemuan simbol penghasil terminal (<span class="font-mono">A</span> dan <span class="font-mono">B</span>), propagasi ke <span class="font-mono">S</span>, serta eliminasi <span class="font-mono">C</span>.';
-    }
-
-    // ==================== SLIDE 6: UNREACHABLE SYMBOLS (BFS RADAR) ====================
-    let bfsTl = null;
-    function runBfsRadar() {
-      if (bfsTl) bfsTl.kill();
-      resetBfsVisuals();
-
-      const btn = document.getElementById('btn-bfs-run');
-      const log = document.getElementById('bfs-log');
-      btn.disabled = true;
-      btn.classList.add('opacity-60');
-
-      bfsTl = gsap.timeline({
-        onComplete: () => {
-          btn.disabled = false;
-          btn.classList.remove('opacity-60');
-          document.getElementById('btn-bfs-reset').classList.remove('hidden');
-        }
-      });
-
-      bfsTl
-        // Pulse 1 at S
-        .set('#radar-S', { r: 26, opacity: 0.9 })
-        .to('#radar-S', { r: 62, opacity: 0, duration: 0.75, ease: 'power2.out' })
-        .add(() => {
-          document.getElementById('bfs-circ-S').setAttribute('stroke', '#10B981');
-          document.getElementById('bfs-loop-S').setAttribute('stroke', '#10B981');
-          document.getElementById('bfs-tag-S').innerHTML = '<span class="text-emerald-500 font-bold">✓ Reachable</span>';
-          log.innerHTML = '<strong>Gelombang 1:</strong> Memulai penelusuran BFS dari simbol awal <span class="font-mono font-bold text-emerald-500">S</span>...';
-        }, '<')
-
-        // Travel S -> A & Pulse 2 at A
-        .add(() => {
-          const eSA = document.getElementById('bfs-edge-SA');
-          eSA.setAttribute('stroke', '#10B981');
-          eSA.setAttribute('marker-end', 'url(#bfs-arr-em)');
-        })
-        .set('#radar-A', { r: 26, opacity: 0.9 })
-        .to('#radar-A', { r: 62, opacity: 0, duration: 0.75, ease: 'power2.out' })
-        .add(() => {
-          document.getElementById('bfs-circ-A').setAttribute('stroke', '#10B981');
-          const eAa = document.getElementById('bfs-edge-Aa');
-          eAa.setAttribute('stroke', '#10B981');
-          eAa.setAttribute('marker-end', 'url(#bfs-arr-em)');
-          document.getElementById('bfs-rect-a').setAttribute('stroke', '#10B981');
-          document.getElementById('bfs-tag-A').innerHTML = '<span class="text-emerald-500 font-bold">✓ Reachable</span>';
-          log.innerHTML = '<strong>Gelombang 2:</strong> Node <span class="font-mono font-bold text-emerald-500">A</span> dan terminal <span class="font-mono font-bold text-emerald-500">a</span> terjangkau dari <span class="font-mono">S</span>.';
-        }, '<')
-
-        // Cut isolated subgraph {B, D}
-        .to('#bfs-isolated-group', {
-          opacity: 0.22,
-          y: 8,
-          duration: 0.55,
-          ease: 'power2.out'
-        }, '+=0.25')
-        .to(['#bfs-rule-B', '#bfs-rule-D'], {
-          opacity: 0.35,
-          duration: 0.4
-        }, '<')
-        .add(() => {
-          document.getElementById('bfs-iso-tag').textContent = 'UNREACHABLE!';
-          document.getElementById('bfs-iso-tag').setAttribute('fill', '#F43F5E');
-          document.getElementById('bfs-rule-B').classList.add('line-through');
-          document.getElementById('bfs-rule-D').classList.add('line-through');
-          document.getElementById('bfs-tag-B').innerHTML = '<span class="text-rose-500 font-bold">✕ Terpotong</span>';
-          document.getElementById('bfs-tag-D').innerHTML = '<span class="text-rose-500 font-bold">✕ Terpotong</span>';
-          log.innerHTML = '<strong class="text-emerald-600 dark:text-emerald-400">Penyederhanaan Tuntas!</strong> Subgraf <span class="font-mono font-bold text-rose-500">{B, D}</span> tidak tersentuh gelombang dari <span class="font-mono">S</span> dan resmi dihapus.';
-        }, '<');
-    }
-
-    function resetBfsVisuals() {
-      gsap.set(['#radar-S', '#radar-A'], { opacity: 0, r: 26 });
-      gsap.set('#bfs-isolated-group', { clearProps: 'all' });
-      gsap.set(['#bfs-rule-B', '#bfs-rule-D'], { clearProps: 'all' });
-
-      document.getElementById('bfs-circ-S').setAttribute('stroke', '#4F46E5');
-      document.getElementById('bfs-circ-A').setAttribute('stroke', '#64748B');
-      document.getElementById('bfs-rect-a').setAttribute('stroke', '#64748B');
-      document.getElementById('bfs-loop-S').setAttribute('stroke', '#64748B');
-
-      ['bfs-edge-SA', 'bfs-edge-Aa'].forEach(id => {
-        const el = document.getElementById(id);
-        el.setAttribute('stroke', '#64748B');
-        el.setAttribute('marker-end', 'url(#bfs-arr)');
-      });
-
-      document.getElementById('bfs-iso-tag').textContent = 'Tanpa jalur masuk';
-      document.getElementById('bfs-iso-tag').setAttribute('fill', '#64748B');
-      document.getElementById('bfs-rule-B').classList.remove('line-through');
-      document.getElementById('bfs-rule-D').classList.remove('line-through');
-
-      document.getElementById('bfs-tag-S').textContent = 'Start';
-      document.getElementById('bfs-tag-A').textContent = 'Pending';
-      document.getElementById('bfs-tag-B').textContent = 'Pending';
-      document.getElementById('bfs-tag-D').textContent = 'Pending';
-    }
-
-    function resetBfsRadar() {
-      if (bfsTl) bfsTl.kill();
-      resetBfsVisuals();
-      document.getElementById('btn-bfs-reset').classList.add('hidden');
-      document.getElementById('bfs-log').innerHTML = 'Klik <strong>"Jalankan Gelombang BFS dari S"</strong> untuk memancarkan gelombang keterjangkauan dan memangkas subgraf terisolasi <span class="font-mono font-bold">{B, D}</span>.';
-    }
-
-    // ==================== SLIDE 7: END-TO-END CASE STUDY ====================
-    // Pola animasi sama dengan Slide 3: aturan baru "pop" masuk (hijau),
-    // aturan yang gugur dicoret merah lalu memudar, bukan render ulang seluruh kartu.
-    const PILL_BASE = 'rule-pill border whitespace-nowrap overflow-hidden ';
-    const PILL_STATE = {
-      neutral:  'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700',
-      nullable: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
-      fresh:    'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
-      warn:     'bg-rose-500/10 text-rose-500 border-rose-500/30',
-      dead:     'bg-rose-500/15 text-rose-500 border-rose-500/30 line-through'
-    };
-
-    // add = fase kemunculan, rem = fase penghapusan, first = tanpa prefix "|"
-    const e2eRows = [
-      { lhs: 'S', tokens: [
-        { t: 'ABaC', first: true },
-        { t: 'AaC', add: 1 }, { t: 'BaC', add: 1 }, { t: 'ABa', add: 1 }, { t: 'aC', add: 1 },
-        { t: 'Aa', add: 1 }, { t: 'Ba', add: 1 }, { t: 'a', add: 1 }
-      ]},
-      { lhs: 'A', tokens: [
-        { t: 'BC', first: true },
-        { t: 'B', add: 1, rem: 2 }, { t: 'C', add: 1, rem: 2 },
-        { t: 'b', add: 2 }, { t: 'd', add: 2 }
-      ]},
-      { lhs: 'B', tokens: [
-        { t: 'b', first: true },
-        { t: 'λ', nullable: true, rem: 1 }
-      ]},
-      { lhs: 'C', tokens: [
-        { t: 'D', first: true, rem: 2 },
-        { t: 'd', first: true, add: 2 },
-        { t: 'λ', nullable: true, rem: 1 }
-      ]},
-      { lhs: 'D', rem: 3, unreachableAt: 2, tokens: [
-        { t: 'd', first: true, rem: 3 }
-      ]}
-    ];
-
-    const e2eData = [
-      {
-        badge: 'Kondisi Awal: Tata Bahasa G',
-        btnHtml: '<i data-lucide="play" class="w-4 h-4"></i><span>Jalankan Fase 1: Hapus λ</span>',
-        btnColor: 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/25',
-        log: 'Tata bahasa awal mengandung variabel <em>nullable</em> <span class="font-mono font-bold text-amber-500">{B, C, A}</span> (karena <span class="font-mono">A → BC ⇒* λ</span>), aturan unit <span class="font-mono">C → D</span>, dan variabel yang berpotensi terisolasi.'
-      },
-      {
-        badge: 'Fase 1 Selesai: Bebas λ-Productions',
-        btnHtml: '<i data-lucide="play" class="w-4 h-4"></i><span>Jalankan Fase 2: Hapus Unit</span>',
-        btnColor: 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/25',
-        log: 'Aturan <span class="font-mono">B → λ</span> dan <span class="font-mono">C → λ</span> dihapus. Ekspansi <span class="font-mono">A → BC</span> melahirkan aturan unit baru <span class="font-mono font-bold text-emerald-500">A → B</span> dan <span class="font-mono font-bold text-emerald-500">A → C</span>!'
-      },
-      {
-        badge: 'Fase 2 Selesai: Bebas Unit Productions',
-        btnHtml: '<i data-lucide="play" class="w-4 h-4"></i><span>Jalankan Fase 3: Hapus Useless</span>',
-        btnColor: 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/25',
-        log: 'Rantai unit <span class="font-mono">A → B → b</span> dan <span class="font-mono">A → C → D → d</span> disubstitusi langsung. Akibatnya, variabel <span class="font-mono font-bold text-rose-500">D</span> terputus dari simbol awal <span class="font-mono">S</span>.'
-      },
-      {
-        badge: 'Fase 3 Selesai: Grammar Bersih (Siap ke CNF)',
-        btnHtml: '<i data-lucide="rotate-ccw" class="w-4 h-4"></i><span>Ulangi Studi Kasus</span>',
-        btnColor: 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/25',
-        log: '<strong class="text-emerald-600 dark:text-emerald-400">Penyederhanaan Selesai!</strong> Variabel unreachable <span class="font-mono">D</span> dihapus. Tata bahasa kini bebas dari <span class="font-mono">λ</span>, unit, dan useless productions sehingga siap menuju <strong>Chomsky Normal Form (CNF)</strong>.'
-      }
-    ];
-
-    let e2ePhase = 0;
-    let e2eBusy = false;
-    let e2eTl = null;
-
-    function setPillState(tok, state) {
-      tok.state = state;
-      tok.el.className = PILL_BASE + PILL_STATE[state];
-    }
-
-    function buildEndToEnd() {
-      const container = document.getElementById('e2e-cards');
-      container.innerHTML = '';
-      e2eRows.forEach(row => {
-        const rowEl = document.createElement('div');
-        rowEl.className = 'e2e-rule-card p-3.5 rounded-2xl bg-slate-100/85 dark:bg-slate-900/85 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-2 overflow-hidden';
-
-        const lhs = document.createElement('span');
-        lhs.className = 'font-bold text-indigo-600 dark:text-indigo-400 min-w-[2.5rem] mr-1';
-        lhs.textContent = row.lhs + ' →';
-        rowEl.appendChild(lhs);
-
-        row.tokens.forEach(tok => {
-          tok.el = document.createElement('span');
-          tok.el.textContent = (tok.first ? '' : '| ') + tok.t;
-          setPillState(tok, tok.nullable ? 'nullable' : 'neutral');
-          if (tok.add) tok.el.style.display = 'none';
-          rowEl.appendChild(tok.el);
-        });
-
-        if (row.unreachableAt) {
-          row.tagEl = document.createElement('span');
-          row.tagEl.className = 'ml-auto text-xs font-bold text-rose-500 whitespace-nowrap';
-          row.tagEl.textContent = 'Unreachable dari S!';
-          row.tagEl.style.display = 'none';
-          rowEl.appendChild(row.tagEl);
-        }
-
-        row.el = rowEl;
-        container.appendChild(rowEl);
-      });
-    }
-
-    function setE2eText(phase, animate) {
-      const data = e2eData[phase];
-      const badge = document.getElementById('e2e-badge');
-      const log = document.getElementById('e2e-log');
-      const apply = () => { badge.textContent = data.badge; log.innerHTML = data.log; };
-      if (!animate) { apply(); return; }
-      gsap.to([badge, log], {
-        opacity: 0, duration: 0.15,
-        onComplete: () => { apply(); gsap.to([badge, log], { opacity: 1, duration: 0.35, ease: 'power2.out' }); }
-      });
-    }
-
-    function setE2eButton(phase) {
-      const data = e2eData[phase];
-      const btn = document.getElementById('btn-e2e-step');
-      btn.className = `inline-flex items-center gap-2 px-4 py-2 rounded-xl ${data.btnColor} text-white font-bold text-sm shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer`;
-      btn.innerHTML = data.btnHtml;
-      lucide.createIcons();
-    }
-
-    function setPhasePill(i, status) {
-      const pill = document.getElementById(`e2e-pill-${i}`);
-      const span = pill.querySelector('span:last-child');
-      const base = 'p-3 rounded-xl border flex items-center justify-between text-xs font-bold transition-colors duration-300 ';
-      if (status === 'done') {
-        pill.className = base + 'bg-emerald-500/10 border-emerald-500/40';
-        span.textContent = '✓ Selesai';
-        span.className = 'font-mono text-emerald-500 font-bold';
-        gsap.fromTo(pill, { scale: 0.97 }, { scale: 1, duration: 0.35, ease: 'back.out(2)' });
-      } else if (status === 'running') {
-        pill.className = base + 'bg-amber-500/10 border-amber-500/40';
-        span.textContent = 'Berjalan…';
-        span.className = 'font-mono text-amber-500 font-bold';
-      } else {
-        pill.className = base + 'bg-slate-100/80 dark:bg-slate-900/80 border-slate-200 dark:border-slate-800';
-        span.textContent = 'Menunggu';
-        span.className = 'font-mono text-slate-400';
-      }
-    }
-
-    function runEndToEndPhase(p) {
-      e2eBusy = true;
-      const btn = document.getElementById('btn-e2e-step');
-      btn.disabled = true;
-      btn.classList.add('opacity-60');
-      setPhasePill(p, 'running');
-
-      const adds = [], rems = [], rowsToDrop = [], tags = [];
-      e2eRows.forEach(row => {
-        if (row.rem === p) rowsToDrop.push(row);
-        if (row.unreachableAt === p) tags.push(row);
-        row.tokens.forEach(tok => {
-          if (tok.add === p) adds.push(tok);
-          if (tok.rem === p) rems.push(tok);
-        });
-      });
-      const pillsToCollapse = rems.filter(tok => !rowsToDrop.some(r => r.tokens.includes(tok)));
-
-      e2eTl = gsap.timeline({
-        onComplete: () => {
-          setPhasePill(p, 'done');
-          e2ePhase = p;
-          setE2eButton(p);
-          btn.disabled = false;
-          btn.classList.remove('opacity-60');
-          e2eBusy = false;
-        }
-      });
-
-      // 0. Ganti badge + log, redupkan warna hijau fase sebelumnya
-      e2eTl.add(() => {
-        setE2eText(p, true);
-        e2eRows.forEach(r => r.tokens.forEach(t => { if (t.state === 'fresh') setPillState(t, 'neutral'); }));
-      });
-
-      // 1. Aturan baru muncul (pop, hijau) -- seperti "Langkah 2" di slide 3
-      if (adds.length) {
-        e2eTl.add(() => {
-          adds.forEach(t => { t.el.style.display = ''; setPillState(t, 'fresh'); });
-          gsap.set(adds.map(t => t.el), { opacity: 0, scale: 0.7 });
-        }, '+=0.3');
-        e2eTl.to(adds.map(t => t.el), {
-          opacity: 1, scale: 1, duration: 0.4, stagger: 0.08, ease: 'back.out(1.6)'
-        });
-      }
-
-      // 2. Aturan yang gugur dicoret merah lalu meredup -- seperti "Langkah 3" di slide 3
-      if (rems.length) {
-        e2eTl.add(() => rems.forEach(t => setPillState(t, 'dead')), '+=0.35');
-        e2eTl.to(rems.map(t => t.el), { opacity: 0.35, scale: 0.92, duration: 0.45, ease: 'power2.out' });
-      }
-
-      // 3a. Penanda variabel tak terjangkau (fase 2)
-      tags.forEach(row => {
-        e2eTl.add(() => {
-          row.tokens.forEach(t => setPillState(t, 'warn'));
-          row.tagEl.style.display = '';
-          gsap.set(row.tagEl, { opacity: 0, scale: 0.7 });
-        }, '+=0.3');
-        e2eTl.to(row.tagEl, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.6)' });
-      });
-
-      // 3b. Pill yang dicoret menyusut halus sampai hilang
-      if (pillsToCollapse.length) {
-        e2eTl.to(pillsToCollapse.map(t => t.el), {
-          opacity: 0, scale: 0.6, width: 0, paddingLeft: 0, paddingRight: 0, marginLeft: -8, borderWidth: 0,
-          duration: 0.45, ease: 'power2.in'
-        }, '+=0.5');
-        e2eTl.add(() => pillsToCollapse.forEach(t => { t.el.style.display = 'none'; }));
-      }
-
-      // 3c. Baris variabel yang sepenuhnya useless (D) menutup
-      if (rowsToDrop.length) {
-        const rowEls = rowsToDrop.map(r => r.el);
-        e2eTl.to(rowEls, {
-          opacity: 0, height: 0, paddingTop: 0, paddingBottom: 0, marginTop: 0, borderWidth: 0,
-          duration: 0.55, ease: 'power2.inOut'
-        }, '+=0.5');
-        e2eTl.add(() => rowEls.forEach(el => { el.style.display = 'none'; }));
-      }
-
-      e2eTl.add(() => {}, '+=0.25'); // jeda napas sebelum tombol aktif
-    }
-
-    function resetEndToEnd() {
-      e2ePhase = 0;
-      buildEndToEnd();
-      setE2eText(0, false);
-      setE2eButton(0);
-      for (let i = 1; i <= 3; i++) setPhasePill(i, 'wait');
-      gsap.from('.e2e-rule-card', { y: 14, opacity: 0, duration: 0.38, stagger: 0.06, ease: 'power2.out' });
-    }
-
-    function nextEndToEndPhase() {
-      if (e2eBusy) return;
-      if (e2ePhase >= e2eData.length - 1) { resetEndToEnd(); return; }
-      runEndToEndPhase(e2ePhase + 1);
-    }
-
-    function initEndToEnd() {
-      buildEndToEnd();
-      setE2eText(0, false);
-      setE2eButton(0);
-    }
-
-    // Boot Application
-    window.addEventListener('DOMContentLoaded', () => {
-      initSlide1Animations();
-      initEndToEnd();
-    });
-  </script>
+  <footer class="footer">
+    <div class="footer-left"><span id="counter">01 / 09</span><span>·</span><span id="slideName">Pembuka</span></div>
+    <div class="nav">
+      <button class="nav-btn" id="prev" aria-label="Slide sebelumnya">←</button>
+      <div class="dots" id="dots"></div>
+      <button class="nav-btn primary" id="next" aria-label="Slide berikutnya">→</button>
+    </div>
+  </footer>
+</div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+const names=['Pembuka','Mengapa disederhanakan?','Eliminasi λ','Eliminasi unit','Non-generating','Unreachable','Studi kasus','Cek pemahaman','Rangkuman'];
+let current=0;
+const $=id=>document.getElementById(id);
+function go(n){
+ current=Math.max(0,Math.min(slides.length-1,n));
+ slides.forEach((s,i)=>s.classList.toggle('active',i===current));
+ $('progress').style.width=((current+1)/slides.length*100)+'%';
+ $('counter').textContent=String(current+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+ $('slideName').textContent=names[current];
+ $('prev').disabled=current===0;$('next').disabled=current===slides.length-1;
+ [...$('dots').children].forEach((d,i)=>d.classList.toggle('active',i===current));
+}
+slides.forEach((_,i)=>{const d=document.createElement('button');d.className='dot';d.title='Ke slide '+(i+1);d.onclick=()=>go(i);$('dots').append(d)});
+$('prev').onclick=()=>go(current-1);$('next').onclick=()=>go(current+1);
+document.addEventListener('keydown',e=>{
+ if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(current+1)}
+ if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(current-1)}
+ if(e.key==='Home')go(0);if(e.key==='End')go(slides.length-1);
+ if(e.key.toLowerCase()==='f')toggleFull();
+});
+$('themeBtn').onclick=()=>{document.body.classList.toggle('darkmode');const d=document.body.classList.contains('darkmode');document.documentElement.style.setProperty('--bg',d?'#0d2025':'#f4f8f8');document.documentElement.style.setProperty('--paper',d?'#142d33':'#ffffff');document.documentElement.style.setProperty('--ink',d?'#e7f4f2':'#142b32');document.documentElement.style.setProperty('--muted',d?'#a4bfbd':'#61757b');document.documentElement.style.setProperty('--line',d?'#29464b':'#dce8e8');document.querySelectorAll('.card:not(.dark)').forEach(c=>c.style.background=d?'#142d33':'');document.querySelectorAll('.rule-row,.stage').forEach(c=>c.style.background=d?'#10272d':'');document.querySelectorAll('.token').forEach(c=>c.style.background=d?'#203c40':'');document.querySelectorAll('.quiz-option').forEach(c=>c.style.background=d?'#142d33':'');};
+async function toggleFull(){try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){}}
+$('fullBtn').onclick=toggleFull;
+go(0);
+
+// Lambda simulation
+let lamStep=0;
+const lamStages=[
+ {set:'Vₙ = { A }',why:'A nullable karena A → λ. B tidak nullable karena tidak memiliki derivasi menuju λ.',variants:'S → AB | B | aSb | c',explain:'Pada S → AB, A dapat dihilangkan sehingga alternatif S → B ditambahkan. Pada aSb, tidak ada variabel nullable yang perlu dihilangkan.'},
+ {set:'Vₙ = { A }',why:'Tidak ada variabel lain yang nullable: S tidak dapat menghilangkan B, dan B selalu menghasilkan setidaknya satu b.',variants:'A → aA | a',explain:'Dari aA, A dapat dihilangkan sehingga a sudah tersedia. Produksi A → λ dihapus.'},
+ {set:'Vₙ = { A }',why:'Semua produksi λ telah dihilangkan dan alternatif yang diperlukan telah ditambahkan.',variants:'S → aSb | AB | B | c<br>A → aA | a<br>B → bB | b',explain:'Grammar hasil tidak memiliki λ-productions. Bahasa tetap sama karena S tidak dapat menghasilkan λ.'}
+];
+$('lambdaNext').onclick=()=>{
+ lamStep=Math.min(3,lamStep+1);
+ if(lamStep===1){$('nullableSet').textContent=lamStages[0].set;$('nullableWhy').textContent=lamStages[0].why;$('lambdaVariants').innerHTML=lamStages[0].variants;$('lambdaExplain').textContent=lamStages[0].explain;$('lambdaStatus').textContent='A teridentifikasi sebagai nullable.';$('lambdaNext').textContent='Langkah 2 · Hasilkan alternatif'}
+ else if(lamStep===2){$('nullableSet').textContent=lamStages[1].set;$('nullableWhy').textContent=lamStages[1].why;$('lambdaVariants').innerHTML=lamStages[1].variants;$('lambdaExplain').textContent=lamStages[1].explain;$('lambdaStatus').textContent='Alternatif produksi sudah dibentuk.';$('lambdaNext').textContent='Langkah 3 · Hapus λ'}
+ else {$('nullableSet').textContent=lamStages[2].set;$('nullableWhy').textContent=lamStages[2].why;$('lambdaVariants').innerHTML=lamStages[2].variants;$('lambdaExplain').textContent=lamStages[2].explain;$('lambdaStatus').textContent='Selesai: grammar bebas dari λ-productions.';$('lambdaNext').disabled=true}
+};
+$('lambdaReset').onclick=()=>{lamStep=0;$('nullableSet').textContent='Vₙ = { }';$('nullableWhy').textContent='Belum ada variabel yang ditandai.';$('lambdaVariants').textContent='S → AB';$('lambdaExplain').textContent='Klik langkah berikutnya untuk melihat variasi aturan.';$('lambdaStatus').textContent='Mulai dengan mencari variabel yang dapat menghasilkan λ.';$('lambdaNext').disabled=false;$('lambdaNext').textContent='Langkah 1 · Deteksi nullable'};
+
+// Unit simulation
+let unitStep=0;
+$('unitNext').onclick=()=>{
+ unitStep++;
+ ['unS','unA','unB','unC'].forEach((id,i)=>$(id).classList.toggle('active',i<=Math.min(unitStep,3)));
+ if(unitStep===1){$('unitStatus').textContent='S dapat mencapai A melalui produksi unit S → A.';$('unitResult').textContent='S : menunggu produksi non-unit dari A, B, C'}
+ if(unitStep===2){$('unitStatus').textContent='A dapat mencapai B. Rantai unit berlanjut.';$('unitResult').textContent='S, A : menyalin B → b dan B → C'}
+ if(unitStep===3){$('unitStatus').textContent='B dapat mencapai C. C menghasilkan terminal c.';$('unitResult').innerHTML='S → b | c<br>A → b | c<br>B → b | c<br>C → c'}
+ if(unitStep>=4){$('unitStatus').textContent='Semua unit-productions dihapus. Produksi non-unit disalin melalui closure unit.';$('unitNext').disabled=true}
+};
+$('unitReset').onclick=()=>{unitStep=0;['unS','unA','unB','unC'].forEach(id=>$(id).classList.remove('active'));$('unitStatus').textContent='Rantai unit: S → A → B → C';$('unitResult').textContent='Menunggu simulasi…';$('unitNext').disabled=false};
+
+// Generating simulation
+let genStep=0;
+$('genNext').onclick=()=>{
+ genStep++;
+ if(genStep===1){$('genSet').textContent='Vg = { A, B }';$('genNote').textContent='A → a dan B → aa langsung menghasilkan string terminal.';$('genStatus').textContent='A dan B adalah generating.'}
+ if(genStep===2){$('genSet').textContent='Vg = { A, B, S }';$('genNote').textContent='S ikut generating karena S → A, dan A sudah diketahui generating.';$('genStatus').textContent='S ditambahkan melalui produksi S → A.'}
+ if(genStep>=3){$('genSet').textContent='Vg = { A, B, S }';$('genNote').textContent='C tidak pernah dapat menghasilkan string terminal: C → aCb selalu menyisakan C.';$('genResult').innerHTML='S → aS | A<br>A → a<br>B → aa';$('genStatus').textContent='C dan produksi yang melibatkannya dihapus.';$('genNext').disabled=true}
+};
+$('genReset').onclick=()=>{genStep=0;$('genSet').textContent='Vg = { }';$('genNote').textContent='Belum ada variabel yang ditambahkan.';$('genResult').innerHTML='S → aS | A | C<br>A → a<br>B → aa<br>C → aCb';$('genStatus').textContent='Periksa aturan yang seluruh hasil akhirnya terminal.';$('genNext').disabled=false};
+
+// Reachability simulation
+let bfsStep=0;
+$('bfsNext').onclick=()=>{
+ bfsStep++;
+ if(bfsStep===1){$('reachS').classList.add('active');$('reachSet').textContent='Vᵣ = { S }';$('bfsStatus').textContent='Mulai dari simbol awal S.'}
+ if(bfsStep===2){$('reachA').classList.add('active');$('reachSet').textContent='Vᵣ = { S, A }';$('bfsStatus').textContent='Dari S → A, variabel A dapat dicapai.'}
+ if(bfsStep>=3){$('reachB').classList.add('dim');$('reachSet').textContent='Vᵣ = { S, A }';$('reachResult').innerHTML='S → aS | A<br>A → a';$('bfsStatus').textContent='B tidak terjangkau dari S, sehingga B dan produksinya dihapus.';$('bfsNext').disabled=true}
+};
+$('bfsReset').onclick=()=>{bfsStep=0;['reachS','reachA'].forEach(id=>$(id).classList.remove('active'));$('reachB').classList.add('dim');$('reachSet').textContent='Vᵣ = {S}';$('reachResult').innerHTML='S → aS | A<br>A → a';$('bfsStatus').textContent='Mulai penelusuran dari simbol awal S.';$('bfsNext').disabled=false};
+
+// End-to-end case
+let casePhase=0;
+const caseData=[
+ {grammar:'S → AB | aA | c<br>A → aA | a<br>B → bB | b<br>C → cC | c',explain:'A nullable. Dari S → AB tambahkan S → B; dari aA tambahkan a. Hapus A → λ. Karena B tidak nullable, S tidak nullable.',status:'Fase 1 selesai: λ-productions dihapus.'},
+ {grammar:'S → AB | aA | c | bB | b<br>A → aA | a<br>B → bB | b<br>C → cC | c',explain:'Unit-production S → B dihapus dengan menyalin semua produksi non-unit milik B: bB dan b. Tidak ada unit-productions lain.',status:'Fase 2 selesai: unit-productions dihapus.'},
+ {grammar:'S → AB | aA | c | bB | b<br>A → aA | a<br>B → bB | b',explain:'C dapat menghasilkan terminal, tetapi tidak dapat dicapai dari S. Maka C dan produksinya dihapus sebagai unreachable.',status:'Fase 3 selesai: tidak ada simbol useless yang tersisa.'}
+];
+$('caseNext').onclick=()=>{
+ casePhase=Math.min(3,casePhase+1);
+ if(casePhase>0){$('caseGrammar').innerHTML=caseData[casePhase-1].grammar;$('caseExplain').textContent=caseData[casePhase-1].explain;$('caseStatus').textContent=caseData[casePhase-1].status}
+ ['caseStep1','caseStep2','caseStep3'].forEach((id,i)=>{$(id).classList.toggle('done',i<casePhase);$(id).classList.toggle('current',i===casePhase&&casePhase<3)});
+ if(casePhase<3)$('caseNext').textContent='Jalankan fase '+(casePhase+1);
+ else{$('caseNext').textContent='Selesai';$('caseNext').disabled=true}
+};
+$('caseReset').onclick=()=>{casePhase=0;$('caseGrammar').innerHTML='S → AB | aA | c<br>A → aA | a | λ<br>B → bB | b<br>C → cC | c';$('caseExplain').textContent='Tahap 1: A nullable. Pada S → AB, hilangkan A untuk memperoleh alternatif S → B. Pada aA, hilangkan A untuk memperoleh a.';$('caseStatus').textContent='Fase 1 dari 3';['caseStep1','caseStep2','caseStep3'].forEach((id,i)=>{$(id).classList.toggle('done',false);$(id).classList.toggle('current',i===0)});$('caseNext').textContent='Jalankan fase 1';$('caseNext').disabled=false};
+
+// Quiz
+document.querySelectorAll('.quiz-option').forEach(btn=>btn.onclick=()=>{
+ const q=btn.dataset.q,correct=btn.dataset.a==='1';
+ document.querySelectorAll('.quiz-option[data-q="'+q+'"]').forEach(b=>{b.classList.remove('correct','wrong');if(b.dataset.a==='1')b.classList.add('correct')});
+ if(!correct)btn.classList.add('wrong');
+ $('quiz'+q).textContent=q==='1'?'Benar: unit-production memiliki satu variabel di sisi kanan.':'Benar: B generating karena menghasilkan bb, tetapi unreachable karena tidak ada jalur dari S.';
+});
+</script>
 </body>
 </html>
