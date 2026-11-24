@@ -1143,7 +1143,7 @@
           duration: 0.75,
           ease: 'power2.inOut'
         })
-        .to('#u-badge-A', { opacity: 1, y: 0, duration: 0.35 })
+        .fromTo('#u-badge-A', { opacity: 0, y: 186 }, { opacity: 1, y: 178, duration: 0.35, ease: 'power2.out' })
         .add(() => {
           document.getElementById('ur-A-old').classList.add('line-through', 'opacity-40');
           document.getElementById('ur-A-new').classList.remove('hidden');
@@ -1157,7 +1157,7 @@
           duration: 0.75,
           ease: 'power2.inOut'
         })
-        .to('#u-badge-S', { opacity: 1, y: 0, duration: 0.35 })
+        .fromTo('#u-badge-S', { opacity: 0, y: 186 }, { opacity: 1, y: 178, duration: 0.35, ease: 'power2.out' })
         .add(() => {
           document.getElementById('ur-S-old').classList.add('line-through', 'opacity-40');
           document.getElementById('ur-S-new').classList.remove('hidden');
