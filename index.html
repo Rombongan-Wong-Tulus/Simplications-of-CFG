@@ -681,18 +681,12 @@
 
             <!-- Isolated Subgraph: Node B -> Node D -->
             <g id="bfs-isolated-group">
-              <line id="bfs-edge-BD" x1="210" y1="205" x2="362" y2="205" stroke="#64748B" stroke-width="3" marker-end="url(#bfs-arr)" />
-              <text x="286" y="193" text-anchor="middle" fill="#64748B" class="font-mono text-[11px]">B → D</text>
-
-              <g transform="translate(180, 205)">
+              <g transform="translate(285, 205)">
                 <circle id="bfs-circ-B" r="24" class="fill-white dark:fill-slate-900 stroke-slate-500" stroke-width="2.5" />
                 <text y="6" text-anchor="middle" class="fill-slate-800 dark:fill-slate-200 font-mono font-bold text-base">B</text>
               </g>
-              <g transform="translate(392, 205)">
-                <circle id="bfs-circ-D" r="24" class="fill-white dark:fill-slate-900 stroke-slate-500" stroke-width="2.5" />
-                <text y="6" text-anchor="middle" class="fill-slate-800 dark:fill-slate-200 font-mono font-bold text-base">D</text>
-              </g>
-              <text id="bfs-iso-tag" x="95" y="209" text-anchor="middle" fill="#64748B" class="font-mono text-[11px]">Tanpa jalur masuk</text>
+              <text x="285" y="250" text-anchor="middle" fill="#64748B" class="font-mono text-[11px]">B → aa</text>
+              <text id="bfs-iso-tag" x="285" y="170" text-anchor="middle" fill="#64748B" class="font-mono text-[11px]">Tanpa jalur masuk</text>
             </g>
 
             <!-- Radar Pulse Rings -->
@@ -729,18 +723,14 @@
                 <span id="bfs-tag-A" class="text-xs text-slate-400">Pending</span>
               </div>
               <div id="bfs-rule-B" class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                <span><strong class="text-indigo-600 dark:text-indigo-400">B →</strong> D | aa</span>
+                <span><strong class="text-indigo-600 dark:text-indigo-400">B →</strong> aa</span>
                 <span id="bfs-tag-B" class="text-xs text-slate-400">Pending</span>
               </div>
-              <div id="bfs-rule-D" class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                <span><strong class="text-indigo-600 dark:text-indigo-400">D →</strong> d</span>
-                <span id="bfs-tag-D" class="text-xs text-slate-400">Pending</span>
-              </div>
-            </div>
+                          </div>
           </div>
 
           <p id="bfs-log" class="mt-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-            Klik <strong>"Jalankan Gelombang BFS dari S"</strong> untuk memancarkan gelombang keterjangkauan dan memangkas subgraf terisolasi <span class="font-mono font-bold">{B, D}</span>.
+            Klik <strong>"Jalankan Gelombang BFS dari S"</strong> untuk memancarkan gelombang keterjangkauan dan memangkas variabel yang tidak terjangkau, yaitu <span class="font-mono font-bold">B</span>.
           </p>
         </div>
       </div>
@@ -1344,14 +1334,14 @@
           log.innerHTML = '<strong>Gelombang 2:</strong> Node <span class="font-mono font-bold text-emerald-500">A</span> dan terminal <span class="font-mono font-bold text-emerald-500">a</span> terjangkau dari <span class="font-mono">S</span>.';
         }, '<')
 
-        // Cut isolated subgraph {B, D}
+        // Cut isolated subgraph {B}
         .to('#bfs-isolated-group', {
           opacity: 0.22,
           y: 8,
           duration: 0.55,
           ease: 'power2.out'
         }, '+=0.25')
-        .to(['#bfs-rule-B', '#bfs-rule-D'], {
+        .to(['#bfs-rule-B'], {
           opacity: 0.35,
           duration: 0.4
         }, '<')
@@ -1359,17 +1349,15 @@
           document.getElementById('bfs-iso-tag').textContent = 'UNREACHABLE!';
           document.getElementById('bfs-iso-tag').setAttribute('fill', '#F43F5E');
           document.getElementById('bfs-rule-B').classList.add('line-through');
-          document.getElementById('bfs-rule-D').classList.add('line-through');
           document.getElementById('bfs-tag-B').innerHTML = '<span class="text-rose-500 font-bold">✕ Terpotong</span>';
-          document.getElementById('bfs-tag-D').innerHTML = '<span class="text-rose-500 font-bold">✕ Terpotong</span>';
-          log.innerHTML = '<strong class="text-emerald-600 dark:text-emerald-400">Penyederhanaan Tuntas!</strong> Subgraf <span class="font-mono font-bold text-rose-500">{B, D}</span> tidak tersentuh gelombang dari <span class="font-mono">S</span> dan resmi dihapus.';
+          log.innerHTML = '<strong class="text-emerald-600 dark:text-emerald-400">Penyederhanaan Tuntas!</strong> Variabel <span class="font-mono font-bold text-rose-500">B</span> tidak tersentuh gelombang dari <span class="font-mono">S</span> (tidak terjangkau), sehingga <span class="font-mono">B → aa</span> dihapus.';
         }, '<');
     }
 
     function resetBfsVisuals() {
       gsap.set(['#radar-S', '#radar-A'], { opacity: 0, attr: { r: 26 } });
       gsap.set('#bfs-isolated-group', { clearProps: 'all' });
-      gsap.set(['#bfs-rule-B', '#bfs-rule-D'], { clearProps: 'all' });
+      gsap.set(['#bfs-rule-B'], { clearProps: 'all' });
 
       document.getElementById('bfs-circ-S').setAttribute('stroke', '#4F46E5');
       document.getElementById('bfs-circ-A').setAttribute('stroke', '#64748B');
@@ -1385,19 +1373,17 @@
       document.getElementById('bfs-iso-tag').textContent = 'Tanpa jalur masuk';
       document.getElementById('bfs-iso-tag').setAttribute('fill', '#64748B');
       document.getElementById('bfs-rule-B').classList.remove('line-through');
-      document.getElementById('bfs-rule-D').classList.remove('line-through');
 
       document.getElementById('bfs-tag-S').textContent = 'Start';
       document.getElementById('bfs-tag-A').textContent = 'Pending';
       document.getElementById('bfs-tag-B').textContent = 'Pending';
-      document.getElementById('bfs-tag-D').textContent = 'Pending';
     }
 
     function resetBfsRadar() {
       if (bfsTl) bfsTl.kill();
       resetBfsVisuals();
       document.getElementById('btn-bfs-reset').classList.add('hidden');
-      document.getElementById('bfs-log').innerHTML = 'Klik <strong>"Jalankan Gelombang BFS dari S"</strong> untuk memancarkan gelombang keterjangkauan dan memangkas subgraf terisolasi <span class="font-mono font-bold">{B, D}</span>.';
+      document.getElementById('bfs-log').innerHTML = 'Klik <strong>"Jalankan Gelombang BFS dari S"</strong> untuk memancarkan gelombang keterjangkauan dan memangkas variabel yang tidak terjangkau, yaitu <span class="font-mono font-bold">B</span>.';
     }
 
     // ==================== SLIDE 7: END-TO-END CASE STUDY ====================
